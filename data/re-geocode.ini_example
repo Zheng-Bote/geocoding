@@ -1,0 +1,26 @@
+[nominatim]
+URI = https://nominatim.openstreetmap.org/reverse?lat={{ latitude }}&lon={{ longitude }}&format=json&accept-language={{ lang }}
+API-Key =
+Adapter = nominatim
+# API usage limit per day
+daily-limit = 100
+# API request timeout in seconds
+timeout = 60
+
+[google]
+URI = https://maps.googleapis.com/maps/api/geocode/json?latlng={{ latitude }},{{ longitude }}&key={{ apikey }}&language={{ lang }}
+API-Key = abcxyz123
+Adapter = google
+# API usage limit per day
+daily-limit = 100
+# API request timeout in seconds
+timeout = 60
+
+[opencage]
+URI = https://api.opencagedata.com/geocode/v1/json?q={{ latitude }}+{{ longitude }}&key={{ apikey }}&language={{ lang }}
+API-Key = abcxyz123
+Adapter = opencage
+# API usage limit per day
+daily-limit = 100
+# API request timeout in seconds
+timeout = 60
