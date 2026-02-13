@@ -1,39 +1,20 @@
-/**
- * SPDX-FileComment: Command line interface for the re-geocode library
- * SPDX-FileType: SOURCE
- * SPDX-FileContributor: ZHENG Robert
- * SPDX-FileCopyrightText: 2026 ZHENG Robert
- * SPDX-License-Identifier: MIT
- *
- * @file main_cli.cpp
- * @brief CLI application for performing reverse geocoding lookups.
- * @version 0.1.0
- * @date 2026-02-13
- *
- * @author ZHENG Robert (robert@hase-zheng.net)
- * @copyright Copyright (c) 2026 ZHENG Robert
- *
- * @license MIT License
- */
-
-#include <CLI/CLI.hpp>
+#include <CLI/CLI.hpp> // Via FetchContent verfügbar
 #include <iostream>
 #include <memory>
 #include <vector>
 
+// Da wir gegen qt_regeocode::lib linken und die Include-Directories
+// dort als PUBLIC definiert sind, finden wir diese Header problemlos.
+#include "regeocode/adapter_geonames_timezone.hpp"
+#include "regeocode/adapter_geonames_wikipedia.hpp"
 #include "regeocode/adapter_google.hpp"
 #include "regeocode/adapter_nominatim.hpp"
 #include "regeocode/adapter_opencage.hpp"
+#include "regeocode/adapter_openweather.hpp"
+#include "regeocode/adapter_pollution.hpp"
 #include "regeocode/http_client.hpp"
 #include "regeocode/re_geocode_core.hpp"
 
-/**
- * @brief Entry point for the regeocode-cli application.
- *
- * @param argc Argument count.
- * @param argv Argument vector.
- * @return int Exit code (0 for success, 1 for error).
- */
 int main(int argc, char **argv) {
   CLI::App app{"Reverse Geocoding CLI (C++23)"};
 
@@ -41,9 +22,9 @@ int main(int argc, char **argv) {
   double lon = 0.0;
   std::string config_path = "re-geocode.ini";
   std::string api_name = "nominatim";
-  std::string lang_override = ""; // Empty = Auto-Detect Local
+  std::string lang_override = ""; // Leer = Auto-Detect Local
 
-  // Define arguments
+  // Argumente definieren
   app.add_option("--lat", lat, "Latitude")->required();
   app.add_option("--lon", lon, "Longitude")->required();
   app.add_option("--config", config_path, "Path to INI config file");
@@ -56,38 +37,43 @@ int main(int argc, char **argv) {
   CLI11_PARSE(app, argc, argv);
 
   try {
-    // 1. Setup: Load configuration
+    // 1. Setup: Config laden
     regeocode::ConfigLoader loader(config_path);
     auto configs = loader.load();
 
-    // 2. Register adapters
+    // 2. Adapter registrieren
     std::vector<regeocode::ApiAdapterPtr> adapters;
     adapters.push_back(std::make_unique<regeocode::NominatimAdapter>());
     adapters.push_back(std::make_unique<regeocode::GoogleAdapter>());
     adapters.push_back(std::make_unique<regeocode::OpenCageAdapter>());
+    adapters.push_back(std::make_unique<regeocode::GeoNamesTimezoneAdapter>());
+    adapters.push_back(std::make_unique<regeocode::GeoNamesWikipediaAdapter>());
+    adapters.push_back(std::make_unique<regeocode::OpenWeatherAdapter>());
+    adapters.push_back(std::make_unique<regeocode::PollutionAdapter>());
 
-    // 3. Instantiate HTTP Client
+    // 3. HTTP Client instanziieren (Thread-safe init via call_once im
+    // Konstruktor)
     auto client = std::make_unique<regeocode::HttpClient>();
 
-    // 4. Create Geocoder
+    // 4. Geocoder erstellen
     regeocode::ReverseGeocoder geocoder(std::move(configs), std::move(adapters),
                                         std::move(client));
 
-    // 5. Execute query
+    // 5. Abfrage ausführen
     std::cout << "Querying API '" << api_name << "' for Coordinates: " << lat
               << ", " << lon << "...\n";
 
-    // Uses dual-language logic (English + Local/Auto)
+    // Nutzt die Dual-Language Logik (Englisch + Local/Auto)
     auto result = geocoder.reverse_geocode_dual_language({lat, lon}, api_name,
                                                          lang_override);
 
-    // 6. Output results
+    // 6. Ausgabe
     std::cout << "==================================================\n";
     std::cout << "English Address: " << result.address_english << "\n";
 
     if (!result.address_local.empty()) {
       std::cout << "Local Address  : " << result.address_local << "\n";
-      // Info output if language was auto-detected
+      // Info-Ausgabe, falls Sprache automatisch erkannt wurde
       if (lang_override.empty() && !result.country_code.empty()) {
         std::cout << "                 [Auto-detected via Country Code: "
                   << result.country_code << "]\n";

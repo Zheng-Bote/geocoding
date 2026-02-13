@@ -17,9 +17,13 @@
  */
 
 #include "regeocode/re_geocode_c_api.h"
+#include "regeocode/adapter_geonames_timezone.hpp"
+#include "regeocode/adapter_geonames_wikipedia.hpp"
 #include "regeocode/adapter_google.hpp"
 #include "regeocode/adapter_nominatim.hpp"
 #include "regeocode/adapter_opencage.hpp"
+#include "regeocode/adapter_openweather.hpp"
+#include "regeocode/adapter_pollution.hpp"
 #include "regeocode/http_client.hpp"
 #include "regeocode/re_geocode_core.hpp"
 
@@ -28,22 +32,11 @@
 
 using namespace regeocode;
 
-/**
- * @brief Wrapper for the ReverseGeocoder instance in C.
- */
 struct geocoder_t {
-  /**
-   * @brief Unique pointer to the C++ ReverseGeocoder implementation.
-   */
   std::unique_ptr<ReverseGeocoder> impl;
 };
 
-/**
- * @brief Helper function to duplicate a string for C compatibility.
- *
- * @param s The source string.
- * @return char* A newly allocated C-style string, or nullptr if the source is empty.
- */
+// Helper um Strings für C zu kopieren
 char *str_dup(const std::string &s) {
   if (s.empty())
     return nullptr;
@@ -61,6 +54,10 @@ geocoder_t *geocoder_new(const char *ini_path) {
     adapters.push_back(std::make_unique<NominatimAdapter>());
     adapters.push_back(std::make_unique<GoogleAdapter>());
     adapters.push_back(std::make_unique<OpenCageAdapter>());
+    adapters.push_back(std::make_unique<GeoNamesTimezoneAdapter>());
+    adapters.push_back(std::make_unique<GeoNamesWikipediaAdapter>());
+    adapters.push_back(std::make_unique<OpenWeatherAdapter>());
+    adapters.push_back(std::make_unique<PollutionAdapter>());
 
     auto client = std::make_unique<HttpClient>();
 
@@ -93,13 +90,14 @@ geocode_result_t geocoder_lookup(geocoder_t *handle, double lat, double lon,
     c_res.success = 1;
 
   } catch (const std::exception &e) {
-    // Error handling could be expanded here (e.g., adding an error string to the struct)
+    // Fehlerbehandlung könnte hier erweitert werden (z.B. Error String im
+    // Struct)
     c_res.success = 0;
   }
   return c_res;
 }
 
-void geocoder_result_free(geocode_result_t *res) {
+void geocode_result_free(geocode_result_t *res) {
   if (!res)
     return;
   delete[] res->address_english;

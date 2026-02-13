@@ -4,9 +4,9 @@
 
 namespace regeocode {
 
-class GoogleAdapter : public ApiAdapter {
+class OpenWeatherAdapter : public ApiAdapter {
 public:
-  std::string name() const override { return "google"; }
+  std::string name() const override { return "openweather"; }
   AddressResult parse_response(const std::string &response_body) const override;
 };
 

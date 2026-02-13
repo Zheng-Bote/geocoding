@@ -50,6 +50,10 @@ add_library(regeocode SHARED
     src/adapter_google.cpp
     src/adapter_opencage.cpp
     src/re_geocode_c_api.cpp
+    src/adapter_geonames_timezone.cpp
+    src/adapter_geonames_wikipedia.cpp
+    src/adapter_openweather.cpp
+    src/adapter_pollution.cpp
 )
 
 add_library(regeocode::lib ALIAS regeocode)

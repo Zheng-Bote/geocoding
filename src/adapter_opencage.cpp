@@ -1,21 +1,3 @@
-/**
- * SPDX-FileComment: OpenCage API adapter implementation
- * SPDX-FileType: SOURCE
- * SPDX-FileContributor: ZHENG Robert
- * SPDX-FileCopyrightText: 2026 ZHENG Robert
- * SPDX-License-Identifier: MIT
- *
- * @file adapter_opencage.cpp
- * @brief Implementation of the OpenCage API adapter.
- * @version 0.1.0
- * @date 2026-02-13
- *
- * @author ZHENG Robert (robert@hase-zheng.net)
- * @copyright Copyright (c) 2026 ZHENG Robert
- *
- * @license MIT License
- */
-
 #include "regeocode/adapter_opencage.hpp"
 
 #include <nlohmann/json.hpp>
