@@ -6,21 +6,61 @@ Adapter = nominatim
 daily-limit = 100
 # API request timeout in seconds
 timeout = 60
+# type of API: geocoding (default or information)
+type = geocoding
 
 [google]
 URI = https://maps.googleapis.com/maps/api/geocode/json?latlng={{ latitude }},{{ longitude }}&key={{ apikey }}&language={{ lang }}
 API-Key = abcxyz123
 Adapter = google
-# API usage limit per day
 daily-limit = 100
-# API request timeout in seconds
 timeout = 60
+type = geocoding
 
 [opencage]
 URI = https://api.opencagedata.com/geocode/v1/json?q={{ latitude }}+{{ longitude }}&key={{ apikey }}&language={{ lang }}
 API-Key = abcxyz123
 Adapter = opencage
-# API usage limit per day
 daily-limit = 100
-# API request timeout in seconds
 timeout = 60
+type = geocoding
+
+[bing]
+URI = https://atlas.microsoft.com/search/address/reverse/json?api-version=1.0&query={{ latitude }},{{ longitude }}&subscription-key={{ apikey }}&language={{ lang }}
+API-Key = abcxyz123
+Adapter = bing
+daily-limit = 1000
+timeout = 10
+type = geocoding
+
+[nearbyWikipedia]
+URI = http://api.geonames.org/findNearbyWikipediaJSON?lat={{ latitude }}&lng={{ longitude }}&username={{ apikey }}&lang={{ lang }}
+API-Key = abcxyz123
+Adapter = nearbyWikipedia
+daily-limit = 1000
+timeout = 10
+type = information
+
+[timezone]
+URI = http://api.geonames.org/timezoneJSON?lat={{ latitude }}&lng={{ longitude }}&username={{ apikey }}
+API-Key = abcxyz123
+Adapter = timezone
+daily-limit = 1000
+timeout = 10
+type = information
+
+[openweather]
+URI = https://api.openweathermap.org/data/2.5/weather?lat={{ latitude }}&lon={{ longitude }}&appid={{ apikey }}&units=metric&lang={{ lang }}
+API-Key = abcxyz123
+Adapter = openweather
+daily-limit = 1000
+timeout = 10
+type = information
+
+[pollution]
+URI = https://api.openweathermap.org/data/2.5/air_pollution?lat={{ latitude }}&lon={{ longitude }}&appid={{ apikey }}
+API-Key = abcxyz123
+Adapter = pollution
+daily-limit = 1000
+timeout = 10
+type = information
