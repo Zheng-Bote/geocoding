@@ -27,11 +27,15 @@ AddressResult GeoNamesTimezoneAdapter::parse_response(
     // Wir nutzen address_english für die Zeitzone-ID
     if (j.contains("timezoneId")) {
       res.address_english = j["timezoneId"].get<std::string>();
+      res.attributes["timezone_id"] = res.address_english;
     }
-
-    // Wir nutzen address_local für die lokale Zeit
     if (j.contains("time")) {
-      res.address_local = j["time"].get<std::string>();
+      res.address_local = j["time"].get<std::string>(); // Für Anzeige
+      res.attributes["local_time"] = res.address_local; // Für JSON Data
+    }
+    if (j.contains("gmtOffset")) {
+      res.attributes["gmt_offset"] =
+          std::to_string(j["gmtOffset"].get<double>());
     }
 
     // Optional: Falls countryName existiert und wir noch keine "Adresse" haben,

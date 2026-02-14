@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <memory>
 #include <string>
 
@@ -10,6 +11,7 @@ struct AddressResult {
   std::string address_local;
   std::string raw_json;
   std::string country_code;
+  std::map<std::string, std::string> attributes;
 };
 
 class ApiAdapter {

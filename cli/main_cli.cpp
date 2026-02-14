@@ -1,7 +1,10 @@
-#include <CLI/CLI.hpp> // Via FetchContent verfügbar
+#include <CLI/CLI.hpp>
 #include <iostream>
 #include <memory>
 #include <vector>
+
+#include "regeocode/http_client.hpp"
+#include "regeocode/re_geocode_core.hpp"
 
 // Da wir gegen qt_regeocode::lib linken und die Include-Directories
 // dort als PUBLIC definiert sind, finden wir diese Header problemlos.
@@ -22,26 +25,20 @@ int main(int argc, char **argv) {
   double lon = 0.0;
   std::string config_path = "re-geocode.ini";
   std::string api_name = "nominatim";
-  std::string lang_override = ""; // Leer = Auto-Detect Local
+  std::string lang_override = "";
 
-  // Argumente definieren
   app.add_option("--lat", lat, "Latitude")->required();
   app.add_option("--lon", lon, "Longitude")->required();
-  app.add_option("--config", config_path, "Path to INI config file");
-  app.add_option("--api", api_name,
-                 "API section name in INI (e.g. google, nominatim)");
-  app.add_option(
-      "--lang", lang_override,
-      "Override local language (e.g. 'de', 'ja'). English is always fetched.");
+  app.add_option("--config", config_path, "Config file");
+  app.add_option("--api", api_name, "API Name");
+  app.add_option("--lang", lang_override, "Language");
 
   CLI11_PARSE(app, argc, argv);
 
   try {
-    // 1. Setup: Config laden
     regeocode::ConfigLoader loader(config_path);
     auto configs = loader.load();
 
-    // 2. Adapter registrieren
     std::vector<regeocode::ApiAdapterPtr> adapters;
     adapters.push_back(std::make_unique<regeocode::NominatimAdapter>());
     adapters.push_back(std::make_unique<regeocode::GoogleAdapter>());
@@ -51,40 +48,19 @@ int main(int argc, char **argv) {
     adapters.push_back(std::make_unique<regeocode::OpenWeatherAdapter>());
     adapters.push_back(std::make_unique<regeocode::PollutionAdapter>());
 
-    // 3. HTTP Client instanziieren (Thread-safe init via call_once im
-    // Konstruktor)
     auto client = std::make_unique<regeocode::HttpClient>();
-
-    // 4. Geocoder erstellen
     regeocode::ReverseGeocoder geocoder(std::move(configs), std::move(adapters),
                                         std::move(client));
 
-    // 5. Abfrage ausführen
-    std::cout << "Querying API '" << api_name << "' for Coordinates: " << lat
-              << ", " << lon << "...\n";
+    // NEU: Einfach JSON abrufen und ausgeben
+    nlohmann::json result =
+        geocoder.reverse_geocode_json({lat, lon}, api_name, lang_override);
 
-    // Nutzt die Dual-Language Logik (Englisch + Local/Auto)
-    auto result = geocoder.reverse_geocode_dual_language({lat, lon}, api_name,
-                                                         lang_override);
-
-    // 6. Ausgabe
-    std::cout << "==================================================\n";
-    std::cout << "English Address: " << result.address_english << "\n";
-
-    if (!result.address_local.empty()) {
-      std::cout << "Local Address  : " << result.address_local << "\n";
-      // Info-Ausgabe, falls Sprache automatisch erkannt wurde
-      if (lang_override.empty() && !result.country_code.empty()) {
-        std::cout << "                 [Auto-detected via Country Code: "
-                  << result.country_code << "]\n";
-      }
-    } else {
-      std::cout << "Local Address  : <Not available or identical to English>\n";
-    }
-    std::cout << "==================================================\n";
+    // Pretty Print mit 4 Leerzeichen Indentation
+    std::cout << result.dump(4) << std::endl;
 
   } catch (const std::exception &e) {
-    std::cerr << "Error: " << e.what() << std::endl;
+    std::cerr << "{\"error\": \"" << e.what() << "\"}" << std::endl;
     return 1;
   }
 

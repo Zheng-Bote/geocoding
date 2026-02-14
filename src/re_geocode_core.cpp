@@ -212,4 +212,51 @@ AddressResult ReverseGeocoder::reverse_geocode_dual_language(
   return result;
 }
 
+// ...
+
+// Neue Methode für JSON Output
+nlohmann::json
+ReverseGeocoder::reverse_geocode_json(const Coordinates &coords,
+                                      const std::string &api_name,
+                                      const std::string &lang_override) const {
+
+  // 1. Config laden um Typ zu bestimmen
+  auto it = configs_.find(api_name);
+  if (it == configs_.end()) {
+    throw std::runtime_error("Unknown API: " + api_name);
+  }
+  std::string type = it->second.type; // "geocoding" oder "info"
+
+  // 2. Daten abrufen (mit der bestehenden Logik)
+  AddressResult res =
+      reverse_geocode_dual_language(coords, api_name, lang_override);
+
+  // 3. JSON Schema bauen
+  nlohmann::json root;
+  root["meta"] = {{"api", api_name},
+                  {"type", type},
+                  {"latitude", coords.latitude},
+                  {"longitude", coords.longitude}};
+
+  if (type == "geocoding") {
+    // Schema für Geocoding
+    root["result"] = {{"address_english", res.address_english},
+                      {"address_local", res.address_local},
+                      {"country_code", res.country_code}};
+    // Attribute ignorieren wir bei Geocoding meist, oder fügen sie optional an
+    root["result"]["details"] = res.attributes;
+
+  } else {
+    // Schema für Information (Weather, Pollution, etc.)
+    root["result"] = {
+        {"title", res.address_english}, // z.B. Stadtname oder Wikipedia Titel
+        {"summary", res.address_local}, // z.B. Kurzbeschreibung
+        {"country_code", res.country_code},
+        {"data", res.attributes} // Hier liegen die eigentlichen Werte
+    };
+  }
+
+  return root;
+}
+
 } // namespace regeocode

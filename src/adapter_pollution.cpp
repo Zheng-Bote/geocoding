@@ -1,7 +1,5 @@
 #include "regeocode/adapter_pollution.hpp"
-#include <map>
 #include <nlohmann/json.hpp>
-#include <sstream>
 
 namespace regeocode {
 
@@ -12,67 +10,32 @@ PollutionAdapter::parse_response(const std::string &response_body) const {
 
   try {
     auto j = nlohmann::json::parse(response_body);
-
-    if (j.contains("list") && j["list"].is_array() && !j["list"].empty()) {
+    if (j.contains("list") && !j["list"].empty()) {
       const auto &first = j["list"][0];
 
-      // 1. AQI (Air Quality Index) -> address_english
+      // AQI
       if (first.contains("main") && first["main"].contains("aqi")) {
         int aqi = first["main"]["aqi"].get<int>();
+        res.attributes["aqi"] = std::to_string(aqi);
 
-        // Mapping OpenWeatherMap AQI 1-5
-        std::string quality;
-        switch (aqi) {
-        case 1:
-          quality = "Good";
-          break;
-        case 2:
-          quality = "Fair";
-          break;
-        case 3:
-          quality = "Moderate";
-          break;
-        case 4:
-          quality = "Poor";
-          break;
-        case 5:
-          quality = "Very Poor";
-          break;
-        default:
-          quality = "Unknown";
-          break;
-        }
-        res.address_english =
-            "AQI: " + std::to_string(aqi) + " (" + quality + ")";
+        static const char *ratings[] = {"",         "Good", "Fair",
+                                        "Moderate", "Poor", "Very Poor"};
+        if (aqi >= 1 && aqi <= 5)
+          res.address_english = std::string("Air Quality: ") + ratings[aqi];
+        else
+          res.address_english = "Air Quality: Unknown";
       }
 
-      // 2. Komponenten -> address_local (Komma-separierte Liste)
+      // Komponenten in die Map schieben
       if (first.contains("components")) {
-        std::ostringstream oss;
-        const auto &comps = first["components"];
-        bool is_first = true;
-
-        // Wir gehen sicherheitshalber spezifische Keys durch, um die
-        // Reihenfolge zu haben, oder wir iterieren einfach über das JSON
-        // Objekt. Hier iterieren wir über das Objekt für Flexibilität:
-        for (auto &el : comps.items()) {
-          if (!is_first) {
-            oss << ", ";
-          }
-          oss << el.key() << ": " << el.value();
-          is_first = false;
+        for (auto &el : first["components"].items()) {
+          // Speichert z.B. "co" -> "331.41"
+          res.attributes[el.key()] = std::to_string(el.value().get<double>());
         }
-        res.address_local = oss.str();
       }
     }
-
-    // Country Code gibt diese API nicht zurück, bleibt leer.
-
-  } catch (const nlohmann::json::exception &) {
-    // Parsing Fehler ignorieren
+  } catch (...) {
   }
-
   return res;
 }
-
 } // namespace regeocode

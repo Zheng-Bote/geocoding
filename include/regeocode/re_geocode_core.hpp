@@ -7,6 +7,7 @@
 
 #include "api_adapter.hpp"
 #include "http_client.hpp"
+#include <nlohmann/json.hpp>
 
 namespace regeocode {
 
@@ -47,6 +48,10 @@ public:
   reverse_geocode_dual_language(const Coordinates &coords,
                                 const std::string &api_name,
                                 const std::string &user_lang) const;
+
+  nlohmann::json
+  reverse_geocode_json(const Coordinates &coords, const std::string &api_name,
+                       const std::string &lang_override = "") const;
 
 private:
   std::unordered_map<std::string, ApiConfig> configs_;

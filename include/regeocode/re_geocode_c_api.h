@@ -8,9 +8,14 @@ typedef struct geocoder_t geocoder_t;
 
 // Result Struct für C
 typedef struct {
-  char *address_english;
-  char *address_local;
+  char *address_english; // Titel / Ort
+  char *address_local;   // Summary / Beschreibung
   char *country_code;
+
+  // NEU: Der vollständige JSON-Output als String
+  // Damit haben C-User Zugriff auf alle Wetterdaten, Attribute, etc.
+  char *json_full;
+
   int success; // 1 = ok, 0 = error
 } geocode_result_t;
 
