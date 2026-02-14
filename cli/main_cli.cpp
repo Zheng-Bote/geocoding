@@ -1,3 +1,19 @@
+/**
+ * SPDX-FileComment: CLI entry point for the Reverse Geocoding application.
+ * SPDX-FileType: SOURCE
+ * SPDX-FileContributor: ZHENG Robert
+ * SPDX-FileCopyrightText: 2026 ZHENG Robert
+ * SPDX-License-Identifier: MIT
+ *
+ * @file main_cli.cpp
+ * @brief Main entry point for the command-line interface.
+ * @version 0.1.0
+ * @date 2026-02-14
+ *
+ * @author ZHENG Robert
+ * @license MIT License
+ */
+
 #include <CLI/CLI.hpp>
 #include <iostream>
 #include <memory>
@@ -20,13 +36,18 @@
 #include "regeocode/adapter_seaweather.hpp"
 #include "regeocode/adapter_tides.hpp"
 
-// Helper: parse comma separated string into vector
+/**
+ * @brief Helper function to parse a comma-separated string into a vector.
+ *
+ * @param input The input string containing comma-separated values.
+ * @return std::vector<std::string> A list of parsed strings.
+ */
 std::vector<std::string> parse_list(const std::string &input) {
   std::vector<std::string> list;
   std::stringstream ss(input);
   std::string segment;
   while (std::getline(ss, segment, ',')) {
-    // Optional: Trimmen von Leerzeichen
+    // Optional: Trim whitespace
     size_t first = segment.find_first_not_of(' ');
     if (std::string::npos != first) {
       size_t last = segment.find_last_not_of(' ');
@@ -36,6 +57,13 @@ std::vector<std::string> parse_list(const std::string &input) {
   return list;
 }
 
+/**
+ * @brief Main execution function for the CLI.
+ *
+ * @param argc Argument count.
+ * @param argv Argument vector.
+ * @return int Exit code.
+ */
 int main(int argc, char **argv) {
   CLI::App app{"Reverse Geocoding CLI"};
 
@@ -44,8 +72,7 @@ int main(int argc, char **argv) {
   std::string config_path = "re-geocode.ini";
 
   std::string strategy_raw = "nominatim"; // Default Strategy
-  std::string api_name =
-      ""; // Default leer, damit wir erkennen ob User es gesetzt hat
+  std::string api_name = ""; // Default empty, to detect if user has set it
 
   std::string lang_override = "";
   bool batch_mode = false;
@@ -54,11 +81,11 @@ int main(int argc, char **argv) {
   app.add_option("--lon", lon, "Longitude");
   app.add_option("--config", config_path, "Config file");
 
-  // --strategy erlaubt "nominatim,google"
+  // --strategy allows "nominatim,google"
   app.add_option("--strategy", strategy_raw,
                  "Comma-separated list of APIs (Priority List)");
 
-  // --api ist der "Shortcut" für eine einzelne API
+  // --api is the "shortcut" for a single API
   app.add_option("--api", api_name, "API Name (Overrides strategy)");
 
   app.add_option("--lang", lang_override, "Language");
@@ -67,11 +94,11 @@ int main(int argc, char **argv) {
   CLI11_PARSE(app, argc, argv);
 
   try {
-    // 1. Config laden
+    // 1. Load config
     regeocode::ConfigLoader loader(config_path);
     auto config_result = loader.load();
 
-    // 2. Adapter instanziieren
+    // 2. Instantiate adapters
     std::vector<regeocode::ApiAdapterPtr> adapters;
     adapters.push_back(std::make_unique<regeocode::NominatimAdapter>());
     adapters.push_back(std::make_unique<regeocode::GoogleAdapter>());
@@ -84,34 +111,34 @@ int main(int argc, char **argv) {
     adapters.push_back(std::make_unique<regeocode::TidesAdapter>());
     adapters.push_back(std::make_unique<regeocode::SeaWeatherAdapter>());
 
-    // 3. Geocoder instanziieren
+    // 3. Instantiate geocoder
     auto client = std::make_unique<regeocode::HttpClient>();
 
     regeocode::ReverseGeocoder geocoder(
         std::move(config_result.apis), std::move(adapters), std::move(client),
-        config_result.quota_file_path // <--- Neuer Parameter
+        config_result.quota_file_path // <--- New parameter
     );
 
-    // --- LOGIK FIX: --api vs --strategy ---
+    // --- LOGIC FIX: --api vs --strategy ---
     std::vector<std::string> priority_list;
 
     if (!api_name.empty()) {
-      // User hat explizit --api gesetzt -> Das gewinnt
+      // User explicitly set --api -> This wins
       priority_list.push_back(api_name);
     } else {
-      // Sonst nehmen wir die Strategie (Default: nominatim)
+      // Otherwise we take the strategy (Default: nominatim)
       priority_list = parse_list(strategy_raw);
     }
     // --------------------------------------
 
     if (batch_mode) {
       std::cout << "Starting DEMO Batch Processing...\n";
-      // Demo Koordinaten
+      // Demo coordinates
       std::vector<regeocode::Coordinates> batch_inputs = {
-          {48.1351, 11.5820}, // München
+          {48.1351, 11.5820}, // Munich
           {52.5200, 13.4050}, // Berlin
           {48.8566, 2.3522},  // Paris
-          {48.2082, 16.3738}, // Wien
+          {48.2082, 16.3738}, // Vienna
           {40.7128, -74.0060} // New York
       };
 

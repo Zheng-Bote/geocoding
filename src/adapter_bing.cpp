@@ -1,3 +1,19 @@
+/**
+ * SPDX-FileComment: Implementation of the Bing Maps API adapter.
+ * SPDX-FileType: SOURCE
+ * SPDX-FileContributor: ZHENG Robert
+ * SPDX-FileCopyrightText: 2026 ZHENG Robert
+ * SPDX-License-Identifier: MIT
+ *
+ * @file adapter_bing.cpp
+ * @brief Implementation of the Bing Maps Reverse Geocoding API adapter.
+ * @version 0.1.0
+ * @date 2026-02-14
+ *
+ * @author ZHENG Robert
+ * @license MIT License
+ */
+
 #include "regeocode/adapter_bing.hpp"
 #include <iostream>
 
@@ -15,7 +31,7 @@ BingAdapter::parse_response(const std::string &response_body) const {
   try {
     auto root = nlohmann::json::parse(response_body);
 
-    // Azure Maps / Bing Struktur: { "addresses": [ { "address": { ... } } ] }
+    // Azure Maps / Bing Structure: { "addresses": [ { "address": { ... } } ] }
     if (root.contains("addresses") && root["addresses"].is_array() &&
         !root["addresses"].empty()) {
 
@@ -24,25 +40,25 @@ BingAdapter::parse_response(const std::string &response_body) const {
       if (first_hit.contains("address")) {
         const auto &addr = first_hit["address"];
 
-        // 1. Hauptadresse (freeformAddress ist meist am besten lesbar)
+        // 1. Main address (freeformAddress is usually best readable)
         if (addr.contains("freeformAddress")) {
           result.address_english = addr["freeformAddress"].get<std::string>();
-          // Bei Azure Maps wird die Sprache über den API-Parameter gesteuert,
-          // daher ist das Resultat hier meist schon lokalisiert.
+          // For Azure Maps, the language is controlled via API parameter,
+          // so the result is usually already localized.
           result.address_local = result.address_english;
         }
 
-        // 2. Ländercode
+        // 2. Country code
         if (addr.contains("countryCode")) {
           result.country_code = addr["countryCode"].get<std::string>();
         }
 
-        // 3. Attribute befüllen (Alle Felder aus "address" übernehmen)
+        // 3. Fill attributes (Take all fields from "address")
         for (auto &[key, val] : addr.items()) {
           if (val.is_string()) {
             result.attributes[key] = val.get<std::string>();
           } else if (val.is_number()) {
-            // Zahlen in Strings wandeln
+            // Convert numbers to strings
             if (val.is_number_integer()) {
               result.attributes[key] = std::to_string(val.get<long>());
             } else {
@@ -54,7 +70,7 @@ BingAdapter::parse_response(const std::string &response_body) const {
         }
       }
 
-      // Optional: Position aus dem Root-Objekt des Hits holen, falls nötig
+      // Optional: Get position from root object of hit, if necessary
       if (first_hit.contains("position")) {
         result.attributes["position_raw"] =
             first_hit["position"].get<std::string>();

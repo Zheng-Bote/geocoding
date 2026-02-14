@@ -1,3 +1,19 @@
+/**
+ * SPDX-FileComment: Implementation of the GeoNames Timezone API adapter.
+ * SPDX-FileType: SOURCE
+ * SPDX-FileContributor: ZHENG Robert
+ * SPDX-FileCopyrightText: 2026 ZHENG Robert
+ * SPDX-License-Identifier: MIT
+ *
+ * @file adapter_geonames_timezone.cpp
+ * @brief Implementation of the GeoNames Timezone API adapter.
+ * @version 0.1.0
+ * @date 2026-02-14
+ *
+ * @author ZHENG Robert
+ * @license MIT License
+ */
+
 #include "regeocode/adapter_geonames_timezone.hpp"
 #include <nlohmann/json.hpp>
 
@@ -11,36 +27,35 @@ AddressResult GeoNamesTimezoneAdapter::parse_response(
   try {
     auto j = nlohmann::json::parse(response_body);
 
-    // Fehlerbehandlung: GeoNames gibt oft ein "status"-Objekt bei Fehlern
-    // zurück
+    // Error handling: GeoNames often returns a "status" object on errors
     if (j.contains("status")) {
-      // Wenn wir Zeit/Lust haben, könnten wir hier eine Exception werfen
-      // oder das in raw_json lassen. Für jetzt parsen wir einfach weiter,
-      // falls Daten da sind.
+      // If we have time/inclination, we could throw an exception here
+      // or leave it in raw_json. For now, we simply continue parsing
+      // if data is available.
     }
 
-    // Mapping der Felder
+    // Mapping fields
     if (j.contains("countryCode")) {
       res.country_code = j["countryCode"].get<std::string>();
     }
 
-    // Wir nutzen address_english für die Zeitzone-ID
+    // We use address_english for the timezone ID
     if (j.contains("timezoneId")) {
       res.address_english = j["timezoneId"].get<std::string>();
       res.attributes["timezone_id"] = res.address_english;
     }
     if (j.contains("time")) {
-      res.address_local = j["time"].get<std::string>(); // Für Anzeige
-      res.attributes["local_time"] = res.address_local; // Für JSON Data
+      res.address_local = j["time"].get<std::string>(); // For display
+      res.attributes["local_time"] = res.address_local; // For JSON Data
     }
     if (j.contains("gmtOffset")) {
       res.attributes["gmt_offset"] =
           std::to_string(j["gmtOffset"].get<double>());
     }
 
-    // Optional: Falls countryName existiert und wir noch keine "Adresse" haben,
-    // könnten wir das ergänzen. Hier hängen wir es an die Zeitzone an,
-    // damit der User mehr Infos hat.
+    // Optional: If countryName exists and we don't have an "address" yet,
+    // we could append it. Here we append it to the timezone so the user
+    // has more info.
     if (j.contains("countryName")) {
       std::string cname = j["countryName"].get<std::string>();
       if (!res.address_english.empty()) {
@@ -51,8 +66,7 @@ AddressResult GeoNamesTimezoneAdapter::parse_response(
     }
 
   } catch (const nlohmann::json::exception &) {
-    // JSON Fehler ignorieren, leeres Result zurückgeben (oder raw_json bleibt
-    // gesetzt)
+    // Ignore JSON errors, return empty result (or raw_json remains set)
   }
 
   return res;

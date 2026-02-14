@@ -1,3 +1,19 @@
+/**
+ * SPDX-FileComment: Implementation of the C API.
+ * SPDX-FileType: SOURCE
+ * SPDX-FileContributor: ZHENG Robert
+ * SPDX-FileCopyrightText: 2026 ZHENG Robert
+ * SPDX-License-Identifier: MIT
+ *
+ * @file re_geocode_c_api.cpp
+ * @brief Wrapper for the C++ Core API to C.
+ * @version 0.1.0
+ * @date 2026-02-14
+ *
+ * @author ZHENG Robert
+ * @license MIT License
+ */
+
 #include "regeocode/re_geocode_c_api.h"
 #include "regeocode/re_geocode_core.hpp"
 
@@ -25,7 +41,7 @@ struct geocoder_t {
   std::unique_ptr<ReverseGeocoder> impl;
 };
 
-// Helper um Strings für C zu kopieren
+// Helper to copy strings for C
 static char *str_dup(const std::string &s) {
   if (s.empty())
     return nullptr;
@@ -34,14 +50,14 @@ static char *str_dup(const std::string &s) {
   return res;
 }
 
-// --- HIER IST DIE WICHTIGE ÄNDERUNG ---
+// --- HERE IS THE IMPORTANT CHANGE ---
 geocoder_t *geocoder_new(const char *ini_path) {
   if (!ini_path)
     return nullptr;
 
   try {
     ConfigLoader loader(ini_path);
-    // 1. Lädt jetzt das Configuration Struct (APIs + Quota Path)
+    // 1. Now loads the Configuration Struct (APIs + Quota Path)
     auto config_result = loader.load();
 
     std::vector<ApiAdapterPtr> adapters;
@@ -60,11 +76,10 @@ geocoder_t *geocoder_new(const char *ini_path) {
 
     auto *ptr = new geocoder_t();
 
-    // 2. Konstruktor mit Quota-Pfad aufrufen
+    // 2. Call constructor with quota path
     ptr->impl = std::make_unique<ReverseGeocoder>(
         std::move(config_result.apis), std::move(adapters), std::move(client),
-        config_result
-            .quota_file_path // <--- Neuer Parameter aus dem Config Struct
+        config_result.quota_file_path // <--- New parameter from Config Struct
     );
     return ptr;
   } catch (const std::exception &e) {
@@ -86,15 +101,15 @@ geocode_result_t geocoder_lookup(geocoder_t *handle, double lat, double lon,
   try {
     std::string lang = local_lang_override ? local_lang_override : "";
 
-    // 1. Wir holen uns das standardisierte JSON Objekt vom Core
+    // 1. We get the standardized JSON object from Core
     nlohmann::json j_root =
         handle->impl->reverse_geocode_json({lat, lon}, api_name, lang);
 
-    // 2. JSON String für C erzeugen (dump)
+    // 2. Create JSON string for C (dump)
     std::string json_str = j_root.dump();
     c_res.json_full = str_dup(json_str);
 
-    // 3. Fallback Mapping für alte C-Struct Felder
+    // 3. Fallback mapping for old C-Struct fields
     if (j_root.contains("result")) {
       const auto &res = j_root["result"];
       std::string s_eng, s_loc, s_cc;
@@ -121,8 +136,8 @@ geocode_result_t geocoder_lookup(geocoder_t *handle, double lat, double lon,
 
   } catch (const std::exception &e) {
     c_res.success = 0;
-    // Optional: Man könnte den Fehler auch ins JSON schreiben,
-    // wenn man das API-Design ändern würde.
+    // Optional: One could write the error into the JSON if changing the API
+    // design.
   }
   return c_res;
 }

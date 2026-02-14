@@ -1,30 +1,94 @@
 # re-geocode
 
-A modern C++23 Reverse Geocoding Library with support for multiple providers (Nominatim, Google Maps, OpenCage). It provides a clean C++ API, a C-compatible interface, and a command-line tool.
+Reverse Geocoding Library designed for high-availability applications. It unifies multiple providers (Google, OSM, OpenCage, Bing, etc.) and specialized information services (Weather, Tides, Pollution)
 
-## Features
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![C++23](https://img.shields.io/badge/C%2B%2B-23-blue.svg)]()
+[![CMake](https://img.shields.io/badge/CMake-3.23+-blue.svg)]()
 
-- **Multiple Adapters**: Support for Nominatim (OpenStreetMap), Google Maps, and OpenCage.
-- **C++23 Core**: Utilizes modern C++ features for performance and safety.
-- **Dual Language Support**: Automatically fetches addresses in English and attempts to detect/provide the local language.
-- **C-API**: Easy integration with other languages (C, Python, Rust, etc.).
-- **Template-based URIs**: Uses Inja templates for flexible API request formatting.
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/Zheng-Bote/geocoding?logo=GitHub)](https://github.com/Zheng-Bote/geocoding/releases)
 
-## Prerequisites & Dependencies
+[Report Issue](https://github.com/Zheng-Bote/geocoding/issues) · [Request Feature](https://github.com/Zheng-Bote/geocoding/pulls)
 
-### System Requirements
-- **Compiler**: GCC 13+, Clang 16+, or MSVC 19.36+ (C++23 support required).
-- **Build System**: CMake 3.25+.
-- **Library**: `libcurl` (with development headers).
+---
 
-### Bundled/Fetched Dependencies
-The following are automatically handled via CMake `FetchContent`:
-- [nlohmann/json](https://github.com/nlohmann/json)
-- [Rookfighter/inifile-cpp](https://github.com/Rookfighter/inifile-cpp)
-- [CLIUtils/CLI11](https://github.com/CLIUtils/CLI11)
-- [inja](https://github.com/pantor/inja) (included in source)
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Build and Installation
+---
+
+## Description
+
+A modern, resilient **C++23 Reverse Geocoding Library** designed for high-availability applications. It unifies multiple providers (Google, OSM, OpenCage, Bing, etc.) and specialized information services (Weather, Tides, Pollution) into a single, robust interface.
+
+It features **automatic fallback strategies (Circuit Breaker)**, **asynchronous batch processing**, **daily quota management**, and a **standardized JSON output format**.
+
+## 🚀 Key Features
+
+- **Multi-Provider Support**: Seamlessly switch between Nominatim, Google Maps, OpenCage, Bing (Azure), and more.
+- **Resilience & Reliability**:
+  - **Circuit Breaker / Fallback Chain**: Automatically switches to the next provider if one fails or times out.
+  - **Daily Quota Management**: Persistently tracks API usage to prevent over-billing (e.g., stops Google requests after 1000 calls).
+  - **Timeouts**: Configurable HTTP timeouts per provider.
+- **High Performance**:
+  - **C++23 Core**: Built for speed and safety.
+  - **Async Batch Processing**: Resolve thousands of coordinates in parallel using `std::future` and multi-threading.
+- **Unified Data Model**:
+  - **Geocoding**: Standardized address fields + raw attributes.
+  - **Info-Layers**: Support for Weather, Pollution, Tides, Timezones, and Wikipedia.
+  - **JSON Output**: Full access to all data via a standardized JSON structure.
+- **Interoperability**: C-API for integration with Python, Rust, C, etc.
+
+---
+
+## 🏗 Architecture
+
+The library separates the **Core Logic** (Flow Control, Quota, Configuration) from the specific **API Adapters**.
+
+```mermaid
+graph TD
+    User["User / CLI / Python"] --> Core["ReverseGeocoder Core"]
+    Core --> Quota{"Quota Check"}
+    Quota -- Limit Exceeded --> Strategy["Fallback Strategy"]
+    Quota -- OK --> Cache{"Config/Timeout"}
+
+    Strategy -->|Try 1| AdapterA["Primary Adapter (e.g. Google)"]
+    AdapterA -- Error/Timeout --> Strategy
+    Strategy -->|Try 2| AdapterB["Secondary Adapter (e.g. Nominatim)"]
+
+    AdapterA --> HTTP["HTTP Client (libcurl)"]
+    AdapterB --> HTTP
+
+    HTTP --> JSON["Unified JSON Response"]
+```
+
+### Supported Adapters
+
+| Adapter     | Type      | Description                                 |
+| ----------- | --------- | ------------------------------------------- |
+| Nominatim   | geocoding | OpenStreetMap (Free, Fair Use Policy)       |
+| Google      | geocoding | Google Maps Platform (High precision, Paid) |
+| OpenCage    | geocoding | OpenCage Geocoder (Reliable, Tiered)        |
+| Bing        | geocoding | Microsoft Azure Maps (Enterprise)           |
+| Timezone    | info      | GeoNames Timezone data                      |
+| Wikipedia   | info      | Nearby Wikipedia articles                   |
+| OpenWeather | info      | Current weather data                        |
+| Pollution   | info      | Air quality index (AQI) and components      |
+| Tides       | info      | Tide predictions (High/Low tides)           |
+| SeaWeather  | info      | Maritime weather (Wave height, Water temp)  |
+
+## 🛠 Build and Installation
+
+### Prerequisites
+
+- C++ Compiler: GCC 13+, Clang 16+, or MSVC 19.36+ (C++23 support required).
+- CMake: 3.25+
+
+### Dependencies
+
+- libcurl (dev).
+- Fetched automatically: nlohmann/json, inicpp, CLI11, inja.
 
 ### Building from Source
 
@@ -39,125 +103,194 @@ make -j$(nproc)
 ```bash
 sudo make install
 ```
-This installs the shared library, headers, and the `regeocode-cli` tool.
 
-## Integration via CMake FetchContent
+This installs libregeocode.so (Shared Lib), headers, and the regeocode-cli tool.
 
-You can include `re-geocode` directly in your project without manual installation:
+### ⚙️ Configuration (INI)
 
-```cmake
-include(FetchContent)
+The library is fully configuration-driven. You can define timeouts, limits, and templates without recompiling.
 
-FetchContent_Declare(
-    regeocode
-    GIT_REPOSITORY https://github.com/Zheng-Bote/re-geocode.git
-    GIT_TAG main  # Or a specific commit/version
-)
-FetchContent_MakeAvailable(regeocode)
+re-geocode.ini example:
 
-# Link to your target
-target_link_libraries(your_app PRIVATE regeocode::lib)
+```ini
+[config]
+# Path to store the daily usage counter
+quota-file = quota_status.json
+type = config
+
+[strategies]
+# Define a fallback chain
+default = nominatim, google, opencage
+type = strategies
+
+[nominatim]
+URI = [https://nominatim.openstreetmap.org/reverse?lat=](https://nominatim.openstreetmap.org/reverse?lat=){{ latitude }}&lon={{ longitude }}&format=json&accept-language={{ lang }}
+API-Key = none
+Adapter = nominatim
+daily-limit = 0       ; 0 = unlimited
+timeout = 60          ; Seconds
+type = geocoding
+
+[google]
+URI = [https://maps.googleapis.com/maps/api/geocode/json?latlng=](https://maps.googleapis.com/maps/api/geocode/json?latlng=){{ latitude }},{{ longitude }}&key={{ apikey }}&language={{ lang }}
+API-Key = YOUR_KEY
+Adapter = google
+daily-limit = 1000    ; Stop after 1000 requests/day
+timeout = 10
+type = geocoding
+
+[tides]
+URI = [https://api.marea.ooo/v1/tides?latitude=](https://api.marea.ooo/v1/tides?latitude=){{ latitude }}&longitude={{ longitude }}
+API-Key = YOUR_KEY
+Adapter = tides
+type = info
 ```
 
-## C++ Usage Example
+## 💻 Usage Examples
+
+### 1. Command Line Interface (CLI)
+
+Single Lookup with specific API:
+
+```bash
+regeocode-cli --lat 48.137 --lon 11.576 --api google
+```
+
+#### Using a Fallback Strategy
+
+If Nominatim fails, it automatically tries Google, then OpenCage.
+
+```bash
+regeocode-cli --lat 48.137 --lon 11.576 --strategy "nominatim, google, opencage"
+```
+
+#### Batch Processing
+
+Process multiple coordinates in parallel (simulated list in CLI demo).
+
+```bash
+regeocode-cli --batch --strategy "nominatim"
+```
+
+### 2. C++ API
 
 ```cpp
 #include <regeocode/re_geocode_core.hpp>
-#include <regeocode/adapter_nominatim.hpp>
 #include <iostream>
 
 int main() {
-    using namespace regeocode;
+    // 1. Load Configuration
+    regeocode::ConfigLoader loader("re-geocode.ini");
+    auto config_data = loader.load();
 
-    // 1. Setup configurations (usually loaded from INI)
-    std::unordered_map<std::string, ApiConfig> configs;
-    configs["nominatim"] = {
-        .name = "nominatim",
-        .uri_template = "https://nominatim.openstreetmap.org/reverse?lat={{latitude}}&lon={{longitude}}&format=json",
-        .api_key = "",
-        .adapter = "nominatim"
-    };
+    // 2. Setup Adapters & Geocoder
+    std::vector<regeocode::ApiAdapterPtr> adapters;
+    // ... push_back adapters ...
 
-    // 2. Register adapters
-    std::vector<ApiAdapterPtr> adapters;
-    adapters.push_back(std::make_unique<NominatimAdapter>());
+    regeocode::ReverseGeocoder geocoder(
+        std::move(config_data.apis),
+        std::move(adapters),
+        std::make_unique<regeocode::HttpClient>(),
+        config_data.quota_file_path
+    );
 
-    // 3. Initialize Geocoder
-    ReverseGeocoder geocoder(std::move(configs), std::move(adapters));
+    // 3. Robust Lookup with Fallback
+    // Tries 'google' first. If quota exceeded or down, tries 'nominatim'.
+    std::vector<std::string> strategy = {"google", "nominatim"};
 
-    // 4. Perform Lookup
-    Coordinates coords{48.137154, 11.576124}; // Munich
-    auto result = geocoder.reverse_geocode_dual_language(coords, "nominatim", "de");
+    auto json_result = geocoder.reverse_geocode_fallback(
+        {48.137, 11.576},
+        strategy,
+        "de" // Language override
+    );
 
-    std::cout << "English: " << result.address_english << "
-";
-    std::cout << "Local:   " << result.address_local << "
-";
-
+    std::cout << json_result.dump(4) << std::endl;
     return 0;
 }
 ```
 
-## Python Integration (via C-API)
+### 3. Python Integration (via C-API)
 
-Since the library provides a C-API, you can use `ctypes` to call it from Python:
+The C-API provides access to the full JSON response, allowing easy parsing in Python.
 
 ```python
 import ctypes
-from ctypes import c_char_p, c_double, c_int, Structure, POINTER
+import json
 
 # Define the C-Result structure
-class GeocodeResult(Structure):
+class GeocodeResult(ctypes.Structure):
     _fields_ = [
-        ("address_english", c_char_p),
-        ("address_local", c_char_p),
-        ("country_code", c_char_p),
-        ("success", c_int)
+        ("address_english", ctypes.c_char_p),
+        ("address_local", ctypes.c_char_p),
+        ("country_code", ctypes.c_char_p),
+        ("json_full", ctypes.c_char_p),  # Contains all attributes/weather data
+        ("success", ctypes.c_int)
     ]
 
-# Load the library
-lib = ctypes.CDLL("libregeocode.so")
+lib = ctypes.CDLL("./libregeocode.so")
 
-# Configure function signatures
-lib.geocoder_new.argtypes = [c_char_p]
+# Setup signatures
+lib.geocoder_new.argtypes = [ctypes.c_char_p]
 lib.geocoder_new.restype = ctypes.c_void_p
-
-lib.geocoder_lookup.argtypes = [ctypes.c_void_p, c_double, c_double, c_char_p, c_char_p]
+lib.geocoder_lookup.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_char_p, ctypes.c_char_p]
 lib.geocoder_lookup.restype = GeocodeResult
-
-lib.geocoder_result_free.argtypes = [POINTER(GeocodeResult)]
+lib.geocoder_result_free.argtypes = [ctypes.POINTER(GeocodeResult)]
 
 # Usage
 geocoder = lib.geocoder_new(b"re-geocode.ini")
-if geocoder:
-    res = lib.geocoder_lookup(geocoder, 48.137, 11.576, b"nominatim", None)
-    
-    if res.success:
-        print(f"Address (EN): {res.address_english.decode('utf-8')}")
-        print(f"Country:      {res.country_code.decode('utf-8')}")
-    
-    # Clean up
-    lib.geocoder_result_free(ctypes.byref(res))
-    lib.geocoder_free(geocoder)
+
+# Example: Fetching Tides
+res = lib.geocoder_lookup(geocoder, 44.4, -2.1, b"tides", None)
+
+if res.success:
+    # Basic fields
+    print(f"Summary: {res.address_english.decode('utf-8')}")
+
+    # Full Data (Accessing attributes)
+    data = json.loads(res.json_full.decode('utf-8'))
+    print("Full JSON Data:", json.dumps(data, indent=2))
+
+    # Access specific attribute
+    if "result" in data and "data" in data["result"]:
+        print("Water Level:", data["result"]["data"].get("current_height"))
+
+lib.geocoder_result_free(ctypes.byref(res))
 ```
 
-## Configuration (INI File)
+## 🛡 Advanced Features
 
-The library uses an INI file to define API endpoints and keys:
+### Circuit Breaker & Fallback
 
-```ini
-[nominatim]
-URI=https://nominatim.openstreetmap.org/reverse?lat={{ latitude }}&lon={{ longitude }}&format=json
-API-Key=none
-Adapter=nominatim
+The reverse_geocode_fallback method iterates through a priority list of providers. It catches network errors, timeouts, and quota exceptions. It only returns an error if all providers in the list fail.
 
-[google]
-URI=https://maps.googleapis.com/maps/api/geocode/json?latlng={{ latitude }},{{ longitude }}&key={{ apikey }}&language={{ lang }}
-API-Key=YOUR_GOOGLE_KEY
-Adapter=google
-```
+### Quota Management
 
-## License
+The library maintains a persistent state file (default: quota_status.json).
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- It tracks requests per provider per day.
+- It automatically resets counters when the date changes.
+- It is thread-safe for batch processing.
+
+### Async Batching
+
+The batch_reverse_geocode method utilizes std::async (launching threads) to process a vector of coordinates concurrently. This significantly reduces total wait time when querying APIs that support high concurrency but have high latency.
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
 Copyright (c) 2026 ZHENG Robert.
+
+## Author
+
+[![Zheng Robert - Core Development](https://img.shields.io/badge/Github-Zheng_Robert-black?logo=github)](https://www.github.com/Zheng-Bote)
+
+### Code Contributors
+
+![Contributors](https://img.shields.io/github/contributors/Zheng-Bote/geocoding?color=dark-green)
+
+---
+
+**Happy coding! 🚀** :vulcan_salute:

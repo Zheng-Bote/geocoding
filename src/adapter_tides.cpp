@@ -1,3 +1,19 @@
+/**
+ * SPDX-FileComment: Implementation of the Tides API adapter.
+ * SPDX-FileType: SOURCE
+ * SPDX-FileContributor: ZHENG Robert
+ * SPDX-FileCopyrightText: 2026 ZHENG Robert
+ * SPDX-License-Identifier: MIT
+ *
+ * @file adapter_tides.cpp
+ * @brief Implementation of the Tides API adapter.
+ * @version 0.1.0
+ * @date 2026-02-14
+ *
+ * @author ZHENG Robert
+ * @license MIT License
+ */
+
 #include "regeocode/adapter_tides.hpp"
 #include <iomanip>
 #include <nlohmann/json.hpp>
@@ -14,12 +30,12 @@ TidesAdapter::parse_response(const std::string &response_body) const {
   // Defaults
   result.address_english = "Tide Information";
   result.address_local = "No data available";
-  result.country_code = ""; // Tides haben oft keinen Country Code im Root
+  result.country_code = ""; // Tides often don't have a country code in the root
 
   try {
     auto root = nlohmann::json::parse(response_body);
 
-    // 1. Basis-Informationen
+    // 1. Basic information
     std::string unit = "m";
     if (root.contains("unit"))
       unit = root["unit"].get<std::string>();
@@ -39,8 +55,8 @@ TidesAdapter::parse_response(const std::string &response_body) const {
       }
     }
 
-    // 3. Extremwerte (High/Low Tides) verarbeiten
-    // Das ist meist das Wichtigste für den User
+    // 3. Process extreme values (High/Low Tides)
+    // This is usually the most important thing for the user
     if (root.contains("extremes") && root["extremes"].is_array() &&
         !root["extremes"].empty()) {
       int i = 0;
@@ -54,12 +70,12 @@ TidesAdapter::parse_response(const std::string &response_body) const {
         std::string time = item["datetime"];
         double height = item["height"].get<double>();
 
-        // Ins Attribute Map schreiben
+        // Write to attribute map
         result.attributes[prefix + "_state"] = state;
         result.attributes[prefix + "_time"] = time;
         result.attributes[prefix + "_height"] = std::to_string(height);
 
-        // Den allerersten Eintrag als "Summary" nutzen
+        // Use the very first entry as "Summary"
         if (i == 0) {
           std::stringstream ss;
           ss << state << " (" << std::fixed << std::setprecision(2) << height
@@ -69,13 +85,13 @@ TidesAdapter::parse_response(const std::string &response_body) const {
 
         i++;
         if (i >= 5)
-          break; // Max 5 Einträge speichern
+          break; // Save max 5 entries
       }
 
       result.address_local = summary_text;
     }
 
-    // 4. Aktuelle/Nächste stündliche Vorhersage (optional)
+    // 4. Current/Next hourly forecast (optional)
     if (root.contains("heights") && root["heights"].is_array() &&
         !root["heights"].empty()) {
       const auto &current = root["heights"][0];
@@ -85,7 +101,7 @@ TidesAdapter::parse_response(const std::string &response_body) const {
     }
 
   } catch (const std::exception &e) {
-    // Fehlerbehandlung: Leeres Result oder Error Attribute
+    // Error handling: Empty result or error attribute
     result.attributes["error"] = e.what();
   }
 

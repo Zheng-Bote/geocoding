@@ -1,5 +1,5 @@
 /**
- * SPDX-FileComment: Basic unit test for reverse geocoding
+ * SPDX-FileComment: Basic unit test for reverse geocoding.
  * SPDX-FileType: SOURCE
  * SPDX-FileContributor: ZHENG Robert
  * SPDX-FileCopyrightText: 2026 ZHENG Robert
@@ -8,11 +8,9 @@
  * @file test_reverse_geocode.cpp
  * @brief Simple test case for Nominatim reverse geocoding.
  * @version 0.1.0
- * @date 2026-02-13
+ * @date 2026-02-14
  *
- * @author ZHENG Robert (robert@hase-zheng.net)
- * @copyright Copyright (c) 2026 ZHENG Robert
- *
+ * @author ZHENG Robert
  * @license MIT License
  */
 

@@ -1,3 +1,19 @@
+/**
+ * SPDX-FileComment: Implementation of the GeoNames Wikipedia API adapter.
+ * SPDX-FileType: SOURCE
+ * SPDX-FileContributor: ZHENG Robert
+ * SPDX-FileCopyrightText: 2026 ZHENG Robert
+ * SPDX-License-Identifier: MIT
+ *
+ * @file adapter_geonames_wikipedia.cpp
+ * @brief Implementation of the GeoNames Wikipedia API adapter.
+ * @version 0.1.0
+ * @date 2026-02-14
+ *
+ * @author ZHENG Robert
+ * @license MIT License
+ */
+
 #include "regeocode/adapter_geonames_wikipedia.hpp"
 #include <nlohmann/json.hpp>
 
@@ -11,14 +27,14 @@ AddressResult GeoNamesWikipediaAdapter::parse_response(
   try {
     auto j = nlohmann::json::parse(response_body);
 
-    // GeoNames liefert oft ein "geonames" Array
+    // GeoNames often delivers a "geonames" array
     if (j.contains("geonames") && j["geonames"].is_array() &&
         !j["geonames"].empty()) {
 
-      // Wir nehmen das erste Element (das ist normalerweise das nächste)
+      // We take the first element (usually the nearest)
       const auto &first = j["geonames"][0];
 
-      // Titel -> Englisch (z.B. "Glärnisch")
+      // Title -> English (e.g. "Glärnisch")
       if (first.contains("title")) {
         res.address_english = first["title"].get<std::string>();
       }
@@ -28,17 +44,17 @@ AddressResult GeoNamesWikipediaAdapter::parse_response(
         res.address_local = first["summary"].get<std::string>();
       }
 
-      // Wikipedia URL -> An Local anhängen
+      // Wikipedia URL -> Append to Local
       if (first.contains("wikipediaUrl")) {
         std::string wikiUrl = first["wikipediaUrl"].get<std::string>();
 
-        // GeoNames liefert oft URLs ohne Protokoll (z.B.
-        // "en.wikipedia.org/...") Wir lassen es "raw", packen es aber in
-        // Klammern dahinter.
+        // GeoNames often returns URLs without protocol (e.g.
+        // "en.wikipedia.org/..."). We leave it "raw" but put it in
+        // parentheses behind.
         if (!res.address_local.empty()) {
           res.address_local += " (" + wikiUrl + ")";
         } else {
-          // Falls keine Summary da ist, ist die URL der einzige Inhalt
+          // If no summary is there, the URL is the only content
           res.address_local = wikiUrl;
         }
       }
@@ -49,7 +65,7 @@ AddressResult GeoNamesWikipediaAdapter::parse_response(
     }
 
   } catch (const nlohmann::json::exception &) {
-    // Fehler beim Parsen ignorieren, leeres Result zurückgeben
+    // Ignore parsing errors, return empty result
   }
 
   return res;

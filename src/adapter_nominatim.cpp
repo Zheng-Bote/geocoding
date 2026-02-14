@@ -1,3 +1,19 @@
+/**
+ * SPDX-FileComment: Implementation of the Nominatim API adapter.
+ * SPDX-FileType: SOURCE
+ * SPDX-FileContributor: ZHENG Robert
+ * SPDX-FileCopyrightText: 2026 ZHENG Robert
+ * SPDX-License-Identifier: MIT
+ *
+ * @file adapter_nominatim.cpp
+ * @brief Implementation of the Nominatim Reverse Geocoding API adapter.
+ * @version 0.1.0
+ * @date 2026-02-14
+ *
+ * @author ZHENG Robert
+ * @license MIT License
+ */
+
 #include "regeocode/adapter_nominatim.hpp"
 
 #include <nlohmann/json.hpp>

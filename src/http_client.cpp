@@ -1,21 +1,37 @@
+/**
+ * SPDX-FileComment: Implementation of the HTTP Client.
+ * SPDX-FileType: SOURCE
+ * SPDX-FileContributor: ZHENG Robert
+ * SPDX-FileCopyrightText: 2026 ZHENG Robert
+ * SPDX-License-Identifier: MIT
+ *
+ * @file http_client.cpp
+ * @brief Implementation of the HTTP Client using libcurl.
+ * @version 0.1.0
+ * @date 2026-02-14
+ *
+ * @author ZHENG Robert
+ * @license MIT License
+ */
+
 #include "regeocode/http_client.hpp"
 #include <curl/curl.h>
 #include <string>
 
 namespace regeocode {
 
-// --- FIX START: Konstruktor & Destruktor implementieren ---
-// Diese fehlten und haben den Linker-Fehler verursacht.
+// --- FIX START: Implement Constructor & Destructor ---
+// These were missing and caused the linker error.
 HttpClient::HttpClient() {
-  // Hier könnte man curl_global_init aufrufen, ist aber oft optional
+  // We could call curl_global_init here, but it's often optional
 }
 
 HttpClient::~HttpClient() {
-  // Hier könnte man Cleanup machen
+  // We could do cleanup here
 }
 // --- FIX END ----------------------------------------------
 
-// Callback muss vor der Verwendung definiert sein
+// Callback must be defined before use
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb,
                             void *userp) {
   size_t total_size = size * nmemb;

@@ -1,3 +1,19 @@
+/**
+ * SPDX-FileComment: Implementation of the SeaWeather API adapter.
+ * SPDX-FileType: SOURCE
+ * SPDX-FileContributor: ZHENG Robert
+ * SPDX-FileCopyrightText: 2026 ZHENG Robert
+ * SPDX-License-Identifier: MIT
+ *
+ * @file adapter_seaweather.cpp
+ * @brief Implementation of the SeaWeather API adapter.
+ * @version 0.1.0
+ * @date 2026-02-14
+ *
+ * @author ZHENG Robert
+ * @license MIT License
+ */
+
 #include "regeocode/adapter_seaweather.hpp"
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -18,7 +34,7 @@ SeaWeatherAdapter::parse_response(const std::string &response_body) const {
   try {
     auto root = nlohmann::json::parse(response_body);
 
-    // 1. Meta-Daten verarbeiten
+    // 1. Process Metadata
     if (root.contains("meta")) {
       const auto &meta = root["meta"];
       if (meta.contains("lat"))
@@ -35,9 +51,9 @@ SeaWeatherAdapter::parse_response(const std::string &response_body) const {
             std::to_string(meta["requestCount"].get<long>());
     }
 
-    // 2. Wetterdaten (Hours)
-    // Wir konzentrieren uns auf den ersten Eintrag (aktuellste Stunde),
-    // um die Attribute nicht zu sprengen.
+    // 2. Weather data (Hours)
+    // We focus on the first entry (current hour) to avoid exploding the
+    // attributes.
     if (root.contains("hours") && root["hours"].is_array() &&
         !root["hours"].empty()) {
       const auto &current = root["hours"][0];
@@ -45,21 +61,21 @@ SeaWeatherAdapter::parse_response(const std::string &response_body) const {
       std::stringstream summary_ss;
       bool first_summary_item = true;
 
-      // Zeitstempel
+      // Timestamp
       if (current.contains("time")) {
         std::string t = current["time"].get<std::string>();
         result.attributes["time"] = t;
         summary_ss << "Time: " << t << " | ";
       }
 
-      // Dynamisch durch alle Parameter iterieren (airTemperature, waveHeight,
+      // Iterate dynamically through all parameters (airTemperature, waveHeight,
       // etc.)
       for (auto &[key, val_obj] : current.items()) {
         if (key == "time")
-          continue; // Schon behandelt
+          continue; // Already handled
 
         if (val_obj.is_object()) {
-          // Iteriere durch die Provider (smhi, noaa, sg, etc.)
+          // Iterate through providers (smhi, noaa, sg, etc.)
           for (auto &[source, value] : val_obj.items()) {
             std::string attr_key = key + "_" + source;
             std::string attr_val;
@@ -72,30 +88,30 @@ SeaWeatherAdapter::parse_response(const std::string &response_body) const {
 
             result.attributes[attr_key] = attr_val;
 
-            // Für die Summary nehmen wir nur den ersten gefundenen Provider pro
-            // Kategorie um den String kurz zu halten (z.B. nur sg oder noaa)
+            // For the summary we only take the first found provider per
+            // category to keep the string short (e.g. only sg or noaa)
             if (first_summary_item) {
               summary_ss << key << ": " << attr_val;
               first_summary_item = false;
             }
           }
           if (!first_summary_item) {
-            // Reset flag for next category (aber wir wollen simple summary,
-            // also fügen wir hier nichts kompliziertes hinzu, evtl. nur beim
-            // allerersten Key) Bessere Summary Logik:
+            // Reset flag for next category (but we want simple summary,
+            // so we don't add anything complicated here, maybe only for the
+            // very first key) Better Summary Logic:
           }
         }
       }
 
-      // Versuch einer sauberen Summary: Temperatur und Wellenhöhe priorisieren
+      // Attempt at a clean summary: prioritize temperature and wave height
       std::string temp = "";
       std::string wave = "";
 
-      // Helper Lambda um irgendeinen Wert aus dem Objekt zu holen
+      // Helper lambda to get any value from the object
       auto get_any_value = [&](const std::string &key) -> std::string {
         if (current.contains(key) && current[key].is_object() &&
             !current[key].empty()) {
-          // Nimm den ersten Provider (z.B. begin()->value())
+          // Take the first provider (e.g. begin()->value())
           auto it = current[key].begin();
           if (it.value().is_number())
             return std::to_string(it.value().get<double>());
@@ -117,8 +133,7 @@ SeaWeatherAdapter::parse_response(const std::string &response_body) const {
       if (!loc.str().empty()) {
         result.address_local = loc.str();
       } else {
-        result.address_local =
-            summary_ss.str(); // Fallback auf generischen String
+        result.address_local = summary_ss.str(); // Fallback to generic string
       }
     }
 

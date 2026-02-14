@@ -1,3 +1,19 @@
+/**
+ * SPDX-FileComment: Implementation of the Pollution API adapter.
+ * SPDX-FileType: SOURCE
+ * SPDX-FileContributor: ZHENG Robert
+ * SPDX-FileCopyrightText: 2026 ZHENG Robert
+ * SPDX-License-Identifier: MIT
+ *
+ * @file adapter_pollution.cpp
+ * @brief Implementation of the Pollution API adapter.
+ * @version 0.1.0
+ * @date 2026-02-14
+ *
+ * @author ZHENG Robert
+ * @license MIT License
+ */
+
 #include "regeocode/adapter_pollution.hpp"
 #include <nlohmann/json.hpp>
 
@@ -26,10 +42,10 @@ PollutionAdapter::parse_response(const std::string &response_body) const {
           res.address_english = "Air Quality: Unknown";
       }
 
-      // Komponenten in die Map schieben
+      // Push components into the map
       if (first.contains("components")) {
         for (auto &el : first["components"].items()) {
-          // Speichert z.B. "co" -> "331.41"
+          // Saves e.g. "co" -> "331.41"
           res.attributes[el.key()] = std::to_string(el.value().get<double>());
         }
       }

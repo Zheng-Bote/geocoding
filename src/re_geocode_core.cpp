@@ -1,3 +1,19 @@
+/**
+ * SPDX-FileComment: Implementation of the Core Geocoding logic.
+ * SPDX-FileType: SOURCE
+ * SPDX-FileContributor: ZHENG Robert
+ * SPDX-FileCopyrightText: 2026 ZHENG Robert
+ * SPDX-License-Identifier: MIT
+ *
+ * @file re_geocode_core.cpp
+ * @brief Implementation of the Core Geocoding logic.
+ * @version 0.1.0
+ * @date 2026-02-14
+ *
+ * @author ZHENG Robert
+ * @license MIT License
+ */
+
 #include "regeocode/re_geocode_core.hpp"
 #include "regeocode/quota_manager.hpp"
 
@@ -20,8 +36,8 @@
 namespace regeocode {
 
 namespace {
-// ... (Helper Funktionen is_valid_language, language_from_country bleiben
-// gleich) ...
+// ... (Helper functions is_valid_language, language_from_country remain the
+// same) ...
 bool is_valid_language(const std::string &lang) {
   static const std::unordered_set<std::string> valid = {
       "en", "de",    "fr",    "es", "it", "ar", "ru", "pt", "nl", "pl",
@@ -63,33 +79,33 @@ Configuration ConfigLoader::load() const {
   ini::IniFile ini;
   ini.load(ini_path_);
 
-  Configuration result_config; // Das Ergebnis-Objekt
+  Configuration result_config; // The result object
 
   for (auto &sectionPair : ini) {
     const std::string &sectionName = sectionPair.first;
     ini::IniSection &section = sectionPair.second;
 
-    // Typ lesen
+    // Read type
     std::string type = "geocoding";
     if (section.count("type") != 0) {
       type = section["type"].as<std::string>();
     }
 
-    // --- NEU: Global Config Parsing ---
-    // Wenn die Sektion "config" heißt oder type="config" hat
+    // --- NEW: Global Config Parsing ---
+    // If the section is named "config" or has type="config"
     if (sectionName == "config" || type == "config") {
       if (section.count("quota-file")) {
         std::string qf = section["quota-file"].as<std::string>();
-        // Quotes entfernen falls vorhanden
+        // Remove quotes if present
         if (!qf.empty() && qf.front() == '"' && qf.back() == '"') {
           qf = qf.substr(1, qf.size() - 2);
         }
         result_config.quota_file_path = qf;
       }
-      continue; // Nicht als API verarbeiten
+      continue; // Do not process as API
     }
 
-    // Andere Nicht-API Sektionen überspringen
+    // Skip other non-API sections
     if (type == "strategies" || type == "general") {
       continue;
     }
@@ -145,9 +161,9 @@ ReverseGeocoder::ReverseGeocoder(
     std::unordered_map<std::string, ApiConfig> configs,
     std::vector<ApiAdapterPtr> adapters,
     std::unique_ptr<HttpClient> http_client,
-    const std::string &quota_file_path) // NEU: Pfad Argument
+    const std::string &quota_file_path) // NEW: Path argument
     : configs_(std::move(configs)), http_client_(std::move(http_client)),
-      quota_manager_(quota_file_path) // NEU: Init mit Pfad
+      quota_manager_(quota_file_path) // NEW: Init with path
 {
 
   for (auto &a : adapters) {
@@ -155,12 +171,12 @@ ReverseGeocoder::ReverseGeocoder(
   }
 }
 
-// ... (Rest der Datei bleibt exakt gleich wie vorher, reverse_geocode etc.) ...
+// ... (Rest of file remains exactly same as before, reverse_geocode etc.) ...
 AddressResult
 ReverseGeocoder::reverse_geocode(const Coordinates &coords,
                                  const std::string &api_name,
                                  const std::string &language_code) const {
-  // ... Code von vorher ...
+  // ... Code from before ...
   auto it = configs_.find(api_name);
   if (it == configs_.end())
     throw std::runtime_error("Unknown API: " + api_name);
@@ -194,8 +210,8 @@ ReverseGeocoder::reverse_geocode(const Coordinates &coords,
 }
 
 // ... (reverse_geocode_dual_language, reverse_geocode_json,
-// reverse_geocode_fallback, batch_reverse_geocode bleiben gleich) ... Hier zur
-// Sicherheit die Implementationen, damit keine Linker Fehler entstehen:
+// reverse_geocode_fallback, batch_reverse_geocode remain the same) ... Here for
+// safety the implementations, so no linker errors occur:
 
 AddressResult ReverseGeocoder::reverse_geocode_dual_language(
     const Coordinates &coords, const std::string &api_name,
