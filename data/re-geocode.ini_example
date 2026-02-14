@@ -1,8 +1,15 @@
+[strategies]
+# Default Strategy: First OSM, then Google, then OpenCage
+default = nominatim, google, opencage
+# Free Strategy: Only free services
+free_only = nominatim, nearbyWikipedia
+type = strategies
+
 [nominatim]
 URI = https://nominatim.openstreetmap.org/reverse?lat={{ latitude }}&lon={{ longitude }}&format=json&accept-language={{ lang }}
 API-Key =
 Adapter = nominatim
-# API usage limit per day
+# API daily limit for cost-control or fair-use-policy
 daily-limit = 100
 # API request timeout in seconds
 timeout = 60
@@ -39,7 +46,7 @@ API-Key = abcxyz123
 Adapter = nearbyWikipedia
 daily-limit = 1000
 timeout = 10
-type = information
+type = info
 
 [timezone]
 URI = http://api.geonames.org/timezoneJSON?lat={{ latitude }}&lng={{ longitude }}&username={{ apikey }}
@@ -47,7 +54,7 @@ API-Key = abcxyz123
 Adapter = timezone
 daily-limit = 1000
 timeout = 10
-type = information
+type = info
 
 [openweather]
 URI = https://api.openweathermap.org/data/2.5/weather?lat={{ latitude }}&lon={{ longitude }}&appid={{ apikey }}&units=metric&lang={{ lang }}
@@ -55,7 +62,7 @@ API-Key = abcxyz123
 Adapter = openweather
 daily-limit = 1000
 timeout = 10
-type = information
+type = info
 
 [pollution]
 URI = https://api.openweathermap.org/data/2.5/air_pollution?lat={{ latitude }}&lon={{ longitude }}&appid={{ apikey }}
@@ -63,4 +70,4 @@ API-Key = abcxyz123
 Adapter = pollution
 daily-limit = 1000
 timeout = 10
-type = information
+type = info

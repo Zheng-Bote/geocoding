@@ -2,16 +2,17 @@
 
 #include <algorithm>
 #include <fstream>
+#include <future> // Wichtig für batch/async
+#include <iostream>
+#include <sstream> // Wichtig für split
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
-// Stellen Sie sicher, dass dieser Pfad stimmt (abhängig davon wo inja liegt)
-// Falls es direkt in include/ liegt, wäre #include <inja.hpp> korrekter.
 #include "regeocode/inja.hpp"
-
 #include <inicpp.h>
 #include <nlohmann/json.hpp>
 
@@ -58,36 +59,51 @@ std::unordered_map<std::string, ApiConfig> ConfigLoader::load() const {
     throw std::runtime_error("INI file not found: " + ini_path_);
   }
 
-  // Rookfighter: ini::IniFile
   ini::IniFile ini;
   ini.load(ini_path_);
 
   std::unordered_map<std::string, ApiConfig> result;
 
-  // KORREKTUR: "const" entfernt, damit operator[] genutzt werden kann
   for (auto &sectionPair : ini) {
     const std::string &sectionName = sectionPair.first;
-    ini::IniSection &section =
-        sectionPair.second; // Muss non-const sein für [] Zugriff
+    ini::IniSection &section = sectionPair.second;
+
+    // --- SCHRITT 1: ZUERST DEN TYP LESEN ---
+    std::string type = "geocoding"; // Default für Rückwärtskompatibilität
+    if (section.count("type") != 0) {
+      type = section["type"].as<std::string>();
+    }
+
+    // --- SCHRITT 2: WEICHE ---
+    // Wenn es eine reine Konfigurations-Sektion ist, überspringen wir
+    // das Laden als API-Provider.
+    // (Hier könnten wir später Code einfügen, der die Strategien tatsächlich
+    // parst und in eine separate Config-Struktur speichert)
+    if (type == "strategies" || type == "config" || type == "general") {
+      continue;
+    }
 
     ApiConfig cfg;
     cfg.name = sectionName;
+    cfg.type = type;
 
-    // Rookfighter (wie std::map) nutzt count()
+    // --- SCHRITT 3: API VALIDIERUNG ---
+    // Jetzt wissen wir, dass es ein Provider sein MUSS.
+    // Fehlt hier die URI, ist es ein echter Fehler.
+
     if (section.count("URI") == 0)
-      throw std::runtime_error("Missing URI in section: " + sectionName);
+      throw std::runtime_error("Missing URI in API section: " + sectionName);
 
     if (section.count("API-Key") == 0)
-      throw std::runtime_error("Missing API-Key in section: " + sectionName);
+      throw std::runtime_error("Missing API-Key in API section: " +
+                               sectionName);
 
-    // Zugriff via [], Rückgabe ist IniField, Konvertierung via .as<T>()
     cfg.uri_template = section["URI"].as<std::string>();
     cfg.api_key = section["API-Key"].as<std::string>();
 
     if (section.count("Adapter") != 0) {
       cfg.adapter = section["Adapter"].as<std::string>();
-
-      // Anführungszeichen bereinigen
+      // Anführungszeichen entfernen falls vorhanden
       if (!cfg.adapter.empty() && cfg.adapter.front() == '"' &&
           cfg.adapter.back() == '"' && cfg.adapter.size() >= 2) {
         cfg.adapter = cfg.adapter.substr(1, cfg.adapter.size() - 2);
@@ -96,12 +112,11 @@ std::unordered_map<std::string, ApiConfig> ConfigLoader::load() const {
       cfg.adapter = sectionName;
     }
 
-    // Type of adapter
-    if (section.count("type") != 0) {
-      cfg.type = section["type"].as<std::string>();
+    // Timeout lesen (Default 10s, falls nicht angegeben)
+    if (section.count("timeout") != 0) {
+      cfg.timeout = section["timeout"].as<long>();
     } else {
-      // Fallback for old configs: Standard is Geocoding
-      cfg.type = "geocoding";
+      cfg.timeout = 10;
     }
 
     result.emplace(sectionName, std::move(cfg));
@@ -150,11 +165,10 @@ ReverseGeocoder::reverse_geocode(const Coordinates &coords,
   params["apikey"] = cfg.api_key;
   params["lang"] = language_code;
 
-  // Inja Rendering
   inja::Environment env;
   std::string url = env.render(cfg.uri_template, params);
 
-  auto resp = http_client_->get(url);
+  auto resp = http_client_->get(url, cfg.timeout);
 
   if (resp.status_code < 200 || resp.status_code >= 300) {
     throw std::runtime_error("HTTP error: " + std::to_string(resp.status_code));
@@ -167,24 +181,20 @@ AddressResult ReverseGeocoder::reverse_geocode_dual_language(
     const Coordinates &coords, const std::string &api_name,
     const std::string &user_lang) const {
 
-  // --- check config first ---
   auto it = configs_.find(api_name);
   if (it == configs_.end()) {
     throw std::runtime_error("Unknown API: " + api_name);
   }
   const auto &cfg = it->second;
 
-  // if type == "information": only one request, return directly.
-  if (cfg.type == "information") {
-    // if user_lang is empty, use "en" as default for information
+  if (cfg.type == "info" || cfg.type == "information") {
     std::string lang = user_lang.empty() ? "en" : user_lang;
     return reverse_geocode(coords, api_name, lang);
   }
-  // ----------------------------------
 
   AddressResult result;
 
-  // 1. English request
+  // 1. English
   auto en = reverse_geocode(coords, api_name, "en");
   result.address_english = en.address_english;
   result.country_code = en.country_code;
@@ -200,7 +210,7 @@ AddressResult ReverseGeocoder::reverse_geocode_dual_language(
     return result;
   }
 
-  // 3. Auto-Detect Local via Country Code
+  // 3. Auto-Detect Local
   if (!en.country_code.empty()) {
     std::string local_lang = language_from_country(en.country_code);
     auto local = reverse_geocode(coords, api_name, local_lang);
@@ -212,26 +222,20 @@ AddressResult ReverseGeocoder::reverse_geocode_dual_language(
   return result;
 }
 
-// ...
-
-// Neue Methode für JSON Output
 nlohmann::json
 ReverseGeocoder::reverse_geocode_json(const Coordinates &coords,
                                       const std::string &api_name,
                                       const std::string &lang_override) const {
 
-  // 1. Config laden um Typ zu bestimmen
   auto it = configs_.find(api_name);
   if (it == configs_.end()) {
     throw std::runtime_error("Unknown API: " + api_name);
   }
-  std::string type = it->second.type; // "geocoding" oder "info"
+  std::string type = it->second.type;
 
-  // 2. Daten abrufen (mit der bestehenden Logik)
   AddressResult res =
       reverse_geocode_dual_language(coords, api_name, lang_override);
 
-  // 3. JSON Schema bauen
   nlohmann::json root;
   root["meta"] = {{"api", api_name},
                   {"type", type},
@@ -239,24 +243,87 @@ ReverseGeocoder::reverse_geocode_json(const Coordinates &coords,
                   {"longitude", coords.longitude}};
 
   if (type == "geocoding") {
-    // Schema für Geocoding
     root["result"] = {{"address_english", res.address_english},
                       {"address_local", res.address_local},
                       {"country_code", res.country_code}};
-    // Attribute ignorieren wir bei Geocoding meist, oder fügen sie optional an
     root["result"]["details"] = res.attributes;
 
   } else {
-    // Schema für Information (Weather, Pollution, etc.)
-    root["result"] = {
-        {"title", res.address_english}, // z.B. Stadtname oder Wikipedia Titel
-        {"summary", res.address_local}, // z.B. Kurzbeschreibung
-        {"country_code", res.country_code},
-        {"data", res.attributes} // Hier liegen die eigentlichen Werte
-    };
+    root["result"] = {{"title", res.address_english},
+                      {"summary", res.address_local},
+                      {"country_code", res.country_code},
+                      {"data", res.attributes}};
   }
 
   return root;
+}
+
+// ---------------------------------------------------------
+// FALLBACK LOGIC (Circuit Breaker Light) - HIER FEHLTE DER CODE
+// ---------------------------------------------------------
+nlohmann::json ReverseGeocoder::reverse_geocode_fallback(
+    const Coordinates &coords, const std::vector<std::string> &priority_list,
+    const std::string &lang_override) const {
+
+  nlohmann::json last_error;
+
+  for (const auto &api_name : priority_list) {
+    std::string clean_name = api_name;
+    // Trim whitespace
+    clean_name.erase(0, clean_name.find_first_not_of(' '));
+    clean_name.erase(clean_name.find_last_not_of(' ') + 1);
+
+    if (clean_name.empty())
+      continue;
+
+    try {
+      return reverse_geocode_json(coords, clean_name, lang_override);
+    } catch (const std::exception &e) {
+      std::cerr << "[Warning] API '" << clean_name << "' failed: " << e.what()
+                << ". Trying next provider...\n";
+
+      last_error = {{"error", "Provider failed"},
+                    {"provider", clean_name},
+                    {"details", e.what()}};
+      continue;
+    }
+  }
+
+  nlohmann::json error_json;
+  error_json["error"] = "All providers failed";
+  error_json["last_attempt"] = last_error;
+  return error_json;
+}
+
+// ---------------------------------------------------------
+// BATCH PROCESSING (Async) - HIER FEHLTE DER CODE
+// ---------------------------------------------------------
+std::vector<nlohmann::json> ReverseGeocoder::batch_reverse_geocode(
+    const std::vector<Coordinates> &coords_list,
+    const std::vector<std::string> &priority_list,
+    const std::string &lang_override) const {
+
+  std::vector<std::future<nlohmann::json>> futures;
+  futures.reserve(coords_list.size());
+
+  // 1. Tasks starten
+  for (const auto &coord : coords_list) {
+    futures.push_back(std::async(std::launch::async,
+                                 [this, coord, priority_list, lang_override]() {
+                                   return this->reverse_geocode_fallback(
+                                       coord, priority_list, lang_override);
+                                 }));
+  }
+
+  // 2. Ergebnisse einsammeln
+  std::vector<nlohmann::json> results;
+  results.reserve(coords_list.size());
+
+  for (auto &f : futures) {
+    results.push_back(f.get());
+  }
+
+  return results;
 }
 
 } // namespace regeocode
