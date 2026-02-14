@@ -54,6 +54,11 @@ add_library(regeocode SHARED
     src/adapter_geonames_wikipedia.cpp
     src/adapter_openweather.cpp
     src/adapter_pollution.cpp
+    src/adapter_bing.cpp
+    src/adapter_marea_tides.cpp
+    src/adapter_tides.cpp
+    src/adapter_seaweather.cpp
+    src/quota_manager.cpp
 )
 
 add_library(regeocode::lib ALIAS regeocode)

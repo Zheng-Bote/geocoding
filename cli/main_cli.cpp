@@ -8,13 +8,17 @@
 #include "regeocode/re_geocode_core.hpp"
 
 // Adapter Headers
+#include "regeocode/adapter_bing.hpp"
 #include "regeocode/adapter_geonames_timezone.hpp"
 #include "regeocode/adapter_geonames_wikipedia.hpp"
 #include "regeocode/adapter_google.hpp"
+#include "regeocode/adapter_marea_tides.hpp"
 #include "regeocode/adapter_nominatim.hpp"
 #include "regeocode/adapter_opencage.hpp"
 #include "regeocode/adapter_openweather.hpp"
 #include "regeocode/adapter_pollution.hpp"
+#include "regeocode/adapter_seaweather.hpp"
+#include "regeocode/adapter_tides.hpp"
 
 // Helper: parse comma separated string into vector
 std::vector<std::string> parse_list(const std::string &input) {
@@ -65,7 +69,7 @@ int main(int argc, char **argv) {
   try {
     // 1. Config laden
     regeocode::ConfigLoader loader(config_path);
-    auto configs = loader.load();
+    auto config_result = loader.load();
 
     // 2. Adapter instanziieren
     std::vector<regeocode::ApiAdapterPtr> adapters;
@@ -76,12 +80,17 @@ int main(int argc, char **argv) {
     adapters.push_back(std::make_unique<regeocode::GeoNamesWikipediaAdapter>());
     adapters.push_back(std::make_unique<regeocode::OpenWeatherAdapter>());
     adapters.push_back(std::make_unique<regeocode::PollutionAdapter>());
+    adapters.push_back(std::make_unique<regeocode::MareaTidesAdapter>());
+    adapters.push_back(std::make_unique<regeocode::TidesAdapter>());
+    adapters.push_back(std::make_unique<regeocode::SeaWeatherAdapter>());
 
     // 3. Geocoder instanziieren
-    auto client =
-        std::make_unique<regeocode::HttpClient>(); // Konstruktor ist jetzt da!
-    regeocode::ReverseGeocoder geocoder(std::move(configs), std::move(adapters),
-                                        std::move(client));
+    auto client = std::make_unique<regeocode::HttpClient>();
+
+    regeocode::ReverseGeocoder geocoder(
+        std::move(config_result.apis), std::move(adapters), std::move(client),
+        config_result.quota_file_path // <--- Neuer Parameter
+    );
 
     // --- LOGIK FIX: --api vs --strategy ---
     std::vector<std::string> priority_list;
