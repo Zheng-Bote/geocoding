@@ -1,0 +1,26 @@
+{
+    "google": {
+        "count": 25,
+        "date": "2026-02-14"
+    },
+    "marea_tides": {
+        "count": 1,
+        "date": "2026-02-14"
+    },
+    "nominatim": {
+        "count": 20,
+        "date": "2026-02-14"
+    },
+    "opencage": {
+        "count": 30,
+        "date": "2026-02-14"
+    },
+    "seaweather": {
+        "count": 2,
+        "date": "2026-02-14"
+    },
+    "tides": {
+        "count": 8,
+        "date": "2026-02-14"
+    }
+}
