@@ -103,6 +103,7 @@ int main(int argc, char **argv) {
     adapters.push_back(std::make_unique<regeocode::NominatimAdapter>());
     adapters.push_back(std::make_unique<regeocode::GoogleAdapter>());
     adapters.push_back(std::make_unique<regeocode::OpenCageAdapter>());
+    adapters.push_back(std::make_unique<regeocode::BingAdapter>());
     adapters.push_back(std::make_unique<regeocode::GeoNamesTimezoneAdapter>());
     adapters.push_back(std::make_unique<regeocode::GeoNamesWikipediaAdapter>());
     adapters.push_back(std::make_unique<regeocode::OpenWeatherAdapter>());
