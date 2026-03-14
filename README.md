@@ -14,31 +14,35 @@ Reverse Geocoding Library designed for high-availability applications. It unifie
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
-- [Description](#description)
-- [🚀 Key Features](#-key-features)
-- [🏗 Architecture](#-architecture)
-  - [Supported Adapters](#supported-adapters)
-- [🛠 Build and Installation](#-build-and-installation)
-  - [Prerequisites](#prerequisites)
-  - [Dependencies](#dependencies)
-  - [Building from Source](#building-from-source)
-  - [Installation](#installation)
-  - [⚙️ Configuration (INI)](#-configuration-ini)
-- [💻 Usage Examples](#-usage-examples)
-  - [1. Command Line Interface (CLI)](#1-command-line-interface-cli)
-    - [Using a Fallback Strategy](#using-a-fallback-strategy)
-    - [Batch Processing](#batch-processing)
-  - [2. C++ API](#2-c-api)
-  - [3. Python Integration (via C-API)](#3-python-integration-via-c-api)
-- [🛡 Advanced Features](#-advanced-features)
-  - [Circuit Breaker & Fallback](#circuit-breaker--fallback)
-  - [Quota Management](#quota-management)
-  - [Async Batching](#async-batching)
-- [📝 License](#-license)
-- [Author](#author)
-  - [Code Contributors](#code-contributors)
+- [re-geocode](#re-geocode)
+  - [Description](#description)
+  - [🚀 Key Features](#-key-features)
+  - [🏗 Architecture](#-architecture)
+    - [Supported Adapters](#supported-adapters)
+  - [🛠 Build and Installation](#-build-and-installation)
+    - [Prerequisites](#prerequisites)
+    - [Dependencies](#dependencies)
+    - [Building from Source](#building-from-source)
+    - [Installation (Using Make)](#installation-using-make)
+    - [Installation (Using Conan)](#installation-using-conan)
+      - [Uploading to a Conan Remote](#uploading-to-a-conan-remote)
+    - [⚙️ Configuration (INI)](#️-configuration-ini)
+  - [💻 Usage Examples](#-usage-examples)
+    - [1. Command Line Interface (CLI)](#1-command-line-interface-cli)
+      - [Using a Fallback Strategy](#using-a-fallback-strategy)
+      - [Batch Processing](#batch-processing)
+    - [2. C++ API](#2-c-api)
+    - [3. Python Integration (via C-API)](#3-python-integration-via-c-api)
+  - [🛡 Advanced Features](#-advanced-features)
+    - [Circuit Breaker \& Fallback](#circuit-breaker--fallback)
+    - [Quota Management](#quota-management)
+    - [Async Batching](#async-batching)
+  - [📝 License](#-license)
+  - [Author](#author)
+    - [Code Contributors](#code-contributors)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -124,13 +128,56 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
 ```
 
-### Installation
+### Installation (Using Make)
 
 ```bash
 sudo make install
 ```
 
 This installs libregeocode.so (Shared Lib), headers, and the regeocode-cli tool.
+
+### Installation (Using Conan)
+
+The recommended way to use the library in other C++ projects is via the Conan 2 package manager.
+
+1. Build and export the package to your local Conan cache:
+
+```bash
+conan create . -s build_type=Release --build=missing
+```
+
+2. Add the dependency to your project's `conanfile.txt` or `conanfile.py`:
+
+```ini
+[requires]
+regeocode/1.0.0
+```
+
+3. In your `CMakeLists.txt`, find the package:
+
+```cmake
+find_package(regeocode REQUIRED)
+target_link_libraries(your_target PRIVATE regeocode::lib)
+```
+
+#### Uploading to a Conan Remote
+
+If you want to share the package with your team or publish it to a custom artifactory:
+
+1. Add your remote (skip if already configured):
+
+```bash
+conan remote add myremote https://your-artifactory-url/artifactory/api/conan/conan-local
+# Authenticate if necessary
+conan remote login myremote your_username
+```
+
+2. Upload the recipe and binaries:
+
+```bash
+# Uploads the package and all its precompiled binaries
+conan upload regeocode/1.0.0 -r myremote -c
+```
 
 ### ⚙️ Configuration (INI)
 

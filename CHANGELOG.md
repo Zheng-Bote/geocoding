@@ -3,9 +3,12 @@
 **Table of Contents**
 
 - [Changelog](#changelog)
-  - [[0.1.0] - 2026-02-14](#010---2026-02-14)
+  - [[1.0.0] - 2026-03-14](#100---2026-03-14)
     - [Added](#added)
     - [Changed](#changed)
+  - [[0.1.0] - 2026-02-14](#010---2026-02-14)
+    - [Added](#added-1)
+    - [Changed](#changed-1)
     - [Fixed](#fixed)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -16,6 +19,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - 2026-03-14
+
+### Added
+
+- **Conan Package**: Added `conanfile.py` to support building and installing the library as a Conan package.
+- **CMake Improvements**: Updated `CMakeLists.txt` to dynamically find Conan dependencies via `find_package` when available, and added toggles for `BUILD_SHARED_LIBS` and `BUILD_CLI`.
+
+### Changed
+
+- Bumped project version to `1.0.0`.
+- Updated homepage URL to `https://github.com/Zheng-Bote/geocoding`.
 
 ## [0.1.0] - 2026-02-14
 

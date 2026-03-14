@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.25)
 
 project(regeocode
-    VERSION 0.1.0
+    VERSION 1.0.0
     DESCRIPTION "C++ Reverse Geocoding Library"
-    HOMEPAGE_URL "https://github.com/Zheng-Bote/re-geocode"
+    HOMEPAGE_URL "https://github.com/Zheng-Bote/geocoding"
     LANGUAGES CXX C
 )
 
 # C++23 Standard
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -16,12 +17,15 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 include(FetchContent)
 
 # --- 1. JSON ---
-FetchContent_Declare(
-    json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG v3.11.3
-)
-FetchContent_MakeAvailable(json)
+find_package(nlohmann_json QUIET)
+if (NOT nlohmann_json_FOUND)
+    FetchContent_Declare(
+        json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.11.3
+    )
+    FetchContent_MakeAvailable(json)
+endif()
 
 # --- 2. inifile-cpp ---
 FetchContent_Declare(
@@ -32,18 +36,21 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(inifile-cpp)
 
 # --- 3. CLI11 ---
-FetchContent_Declare(
-    cli11
-    GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
-    GIT_TAG v2.4.1
-)
-FetchContent_MakeAvailable(cli11)
+find_package(CLI11 QUIET)
+if (NOT CLI11_FOUND)
+    FetchContent_Declare(
+        cli11
+        GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+        GIT_TAG v2.4.1
+    )
+    FetchContent_MakeAvailable(cli11)
+endif()
 
 find_package(CURL REQUIRED)
 
 # --- Library (Core) ---
 
-add_library(regeocode SHARED
+add_library(regeocode
     src/re_geocode_core.cpp
     src/http_client.cpp
     src/adapter_nominatim.cpp
@@ -76,7 +83,6 @@ target_link_libraries(regeocode
         CURL::libcurl
     PRIVATE
         nlohmann_json::nlohmann_json
-        inicpp
 )
 
 set_target_properties(regeocode PROPERTIES
@@ -87,20 +93,37 @@ set_target_properties(regeocode PROPERTIES
 
 # --- CLI Executable ---
 
-add_executable(regeocode-cli cli/main_cli.cpp)
-target_link_libraries(regeocode-cli PRIVATE regeocode::lib CLI11::CLI11)
+option(BUILD_CLI "Build the command line interface" ON)
+if(BUILD_CLI)
+    add_executable(regeocode-cli cli/main_cli.cpp)
+    target_link_libraries(regeocode-cli PRIVATE regeocode::lib CLI11::CLI11)
+endif()
+
+# libs.txt Generate (timing-safe via GENERATE)
+file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/libs.txt" 
+     CONTENT "$<TARGET_PROPERTY:regeocode,LINK_LIBRARIES>")
+
 
 # --- Installation ---
 
 include(GNUInstallDirs)
 
 # 1. Targets (Lib + CLI) installieren
-install(TARGETS regeocode regeocode-cli
-    EXPORT regeocodeTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+if(BUILD_CLI)
+    install(TARGETS regeocode regeocode-cli
+        EXPORT regeocodeTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+else()
+    install(TARGETS regeocode
+        EXPORT regeocodeTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+endif()
 
 # 2. Header installieren
 install(DIRECTORY include/regeocode

@@ -1,0 +1,147 @@
+{
+  "dependencies": [
+    {
+      "cves": [
+        {
+          "fixed_version": "",
+          "id": "NOT-CHECKED",
+          "severity": "UNKNOWN",
+          "summary": "Version unknown or latest, cannot query OSV",
+          "suppressed": false,
+          "suppression_reason": ""
+        }
+      ],
+      "headers": [],
+      "libraries": [],
+      "licenses": [
+        "UNKNOWN"
+      ],
+      "name": "CURL::libcurl",
+      "source": "cmake_target",
+      "type": "cmake_target",
+      "version": "unknown"
+    },
+    {
+      "cves": [
+        {
+          "fixed_version": "",
+          "id": "NOT-CHECKED",
+          "severity": "UNKNOWN",
+          "summary": "Version unknown or latest, cannot query OSV",
+          "suppressed": false,
+          "suppression_reason": ""
+        }
+      ],
+      "headers": [
+        "/usr/include/nlohmann/json.hpp"
+      ],
+      "libraries": [],
+      "licenses": [
+        "UNKNOWN"
+      ],
+      "name": "nlohmann_json::nlohmann_json",
+      "source": "cmake_target",
+      "type": "cmake_target",
+      "version": "unknown"
+    },
+    {
+      "cves": [],
+      "headers": [],
+      "libraries": [
+        "ld-linux-x86-64.so.2"
+      ],
+      "licenses": [
+        "UNKNOWN"
+      ],
+      "name": "ld-linux-x86-64.so.2",
+      "source": "elf_scan",
+      "type": "system",
+      "version": ""
+    },
+    {
+      "cves": [],
+      "headers": [],
+      "libraries": [
+        "libc.so.6"
+      ],
+      "licenses": [
+        "UNKNOWN"
+      ],
+      "name": "libc.so.6",
+      "source": "elf_scan",
+      "type": "system",
+      "version": ""
+    },
+    {
+      "cves": [],
+      "headers": [],
+      "libraries": [
+        "libcurl.so.4"
+      ],
+      "licenses": [
+        "UNKNOWN"
+      ],
+      "name": "libcurl.so.4",
+      "source": "elf_scan",
+      "type": "system",
+      "version": ""
+    },
+    {
+      "cves": [],
+      "headers": [],
+      "libraries": [
+        "libgcc_s.so.1"
+      ],
+      "licenses": [
+        "UNKNOWN"
+      ],
+      "name": "libgcc_s.so.1",
+      "source": "elf_scan",
+      "type": "system",
+      "version": ""
+    },
+    {
+      "cves": [],
+      "headers": [],
+      "libraries": [
+        "libm.so.6"
+      ],
+      "licenses": [
+        "UNKNOWN"
+      ],
+      "name": "libm.so.6",
+      "source": "elf_scan",
+      "type": "system",
+      "version": ""
+    },
+    {
+      "cves": [],
+      "headers": [],
+      "libraries": [
+        "libstdc++.so.6"
+      ],
+      "licenses": [
+        "UNKNOWN"
+      ],
+      "name": "libstdc++.so.6",
+      "source": "elf_scan",
+      "type": "system",
+      "version": ""
+    }
+  ],
+  "header": {
+    "project": {
+      "name": "geocodng",
+      "workspace_root": "/home/zb_bamboo/DEV/__NEW__/CPP/geocoding"
+    },
+    "scan_date": "2026-03-14",
+    "schema_version": "1.2",
+    "tool": {
+      "author": "ZHENG Bote",
+      "description": "Native C++ Dependency Scanner & SBOM Generator",
+      "homepage": "https://github.com/zb-bamboo/Dependency_Tracker_2",
+      "name": "depdiscover",
+      "version": "1.2.0"
+    }
+  }
+}
