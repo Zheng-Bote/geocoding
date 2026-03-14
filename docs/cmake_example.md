@@ -1,3 +1,12 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [re-geocode cmake example](#re-geocode-cmake-example)
+  - [Integration via CMake FetchContent](#integration-via-cmake-fetchcontent)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # re-geocode cmake example
 
 ## Integration via CMake FetchContent

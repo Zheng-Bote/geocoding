@@ -1,3 +1,16 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [C++ Example](#c-example)
+  - [1. The Code: example_app.cpp](#1-the-code-example_appcpp)
+  - [2. Compile and Link](#2-compile-and-link)
+    - [Option A: Quick test via command line (g++)](#option-a-quick-test-via-command-line-g)
+    - [Option B: Using CMake (Professional)](#option-b-using-cmake-professional)
+  - [3. Execution](#3-execution)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## C++ Example
 
 Here is the complete C++ example for using the installed libregeocode shared library in your own application.

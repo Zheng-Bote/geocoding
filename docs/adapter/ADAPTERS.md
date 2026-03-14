@@ -1,3 +1,13 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [API Adapters](#api-adapters)
+  - [Available Adapters](#available-adapters)
+  - [Common Interface](#common-interface)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # API Adapters
 
 This document provides an overview of the available API adapters in the `regeocode` library. All adapters inherit from the `ApiAdapter` base class and provide a consistent interface for parsing responses from various geocoding and environmental data services.

@@ -1,3 +1,20 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Architecture Overview: re-geocode](#architecture-overview-re-geocode)
+  - [1. High-Level Concept](#1-high-level-concept)
+  - [2. Core Components](#2-core-components)
+    - [2.1. `ReverseGeocoder` (The Facade)](#21-reversegeocoder-the-facade)
+    - [2.2. `QuotaManager`](#22-quotamanager)
+    - [2.3. The Fallback Strategy (Circuit Breaker)](#23-the-fallback-strategy-circuit-breaker)
+  - [3. The Adapter Pattern](#3-the-adapter-pattern)
+    - [Why this is powerful:](#why-this-is-powerful)
+  - [4. Concurrency Model (`std::async`)](#4-concurrency-model-stdasync)
+  - [5. C++23 Modernities Used](#5-c23-modernities-used)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Architecture Overview: re-geocode
 
 The `re-geocode` library is designed to be highly resilient, extensible, and performant, leveraging modern C++23 features. The core philosophy is to decouple the business logic (flow control, quoting, fallback mechanisms) from the specific implementation details of individual API providers (Google, Nominatim, OpenWeather, etc.).

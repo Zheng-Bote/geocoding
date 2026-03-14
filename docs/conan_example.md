@@ -1,3 +1,18 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Building and Distributing re-geocode via Conan](#building-and-distributing-re-geocode-via-conan)
+  - [1. Creating the Package Locally](#1-creating-the-package-locally)
+  - [2. Using the Package in your Project](#2-using-the-package-in-your-project)
+    - [`conanfile.txt` / `conanfile.py`](#conanfiletxt--conanfilepy)
+    - [`CMakeLists.txt`](#cmakeliststxt)
+  - [3. Uploading to a Remote Server](#3-uploading-to-a-remote-server)
+    - [Add Remote & Authenticate](#add-remote--authenticate)
+    - [Upload Package and Binaries](#upload-package-and-binaries)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Building and Distributing re-geocode via Conan
 
 The recommended way to integrate `re-geocode` into other C++ projects is by using the Conan 2 package manager. 
