@@ -203,6 +203,17 @@ process_image_file(const fs::path &file_path,
             result["result"]["country_code"].is_string())
           country_code = result["result"]["country_code"].get<std::string>();
 
+        const std::vector<std::string> tz = {"timezone"};
+        nlohmann::json timezone_result =
+            geocoder.reverse_geocode_fallback(coords, tz);
+        std::cout << "timezone_result: " << timezone_result.dump() << std::endl;
+        std::string timezone = "";
+        if (timezone_result["result"]["data"].contains("timezone_id") &&
+            timezone_result["result"]["data"]["timezone_id"].is_string())
+          timezone = timezone_result["result"]["data"]["timezone_id"]
+                         .get<std::string>();
+        xmpData["Xmp.photoshop.Timezone"] = timezone;
+
         // Write XMP fields (overwrite)
         if (!address_english.empty())
           xmpData["Xmp.dc.address_english"] = address_english;
