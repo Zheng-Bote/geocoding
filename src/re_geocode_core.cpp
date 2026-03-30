@@ -230,6 +230,9 @@ AddressResult ReverseGeocoder::reverse_geocode_dual_language(
   result.address_english = en.address_english;
   result.country_code = en.country_code;
 
+  // TODO: check
+  result.attributes = en.attributes;
+
   if (!user_lang.empty()) {
     if (is_valid_language(user_lang)) {
       auto local = reverse_geocode(coords, api_name, user_lang);
@@ -268,7 +271,9 @@ ReverseGeocoder::reverse_geocode_json(const Coordinates &coords,
     root["result"] = {{"address_english", res.address_english},
                       {"address_local", res.address_local},
                       {"country_code", res.country_code}};
+
     root["result"]["details"] = res.attributes;
+
   } else {
     root["result"] = {{"title", res.address_english},
                       {"summary", res.address_local},

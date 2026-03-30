@@ -7,8 +7,8 @@
  *
  * @file adapter_nominatim.cpp
  * @brief Implementation of the Nominatim Reverse Geocoding API adapter.
- * @version 0.1.0
- * @date 2026-02-14
+ * @version 0.3.0
+ * @date 2026-03-31
  *
  * @author ZHENG Robert
  * @license MIT License
@@ -34,6 +34,9 @@ NominatimAdapter::parse_response(const std::string &response_body) const {
 
   if (j.contains("address") && j["address"].contains("country_code")) {
     res.country_code = j["address"]["country_code"].get<std::string>();
+    res.attributes["country"] = j["address"]["country"].get<std::string>();
+    res.attributes["state"] = j["address"]["state"].get<std::string>();
+    res.attributes["city"] = j["address"]["town"].get<std::string>();
   }
 
   return res;

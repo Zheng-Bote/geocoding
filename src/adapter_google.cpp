@@ -7,8 +7,8 @@
  *
  * @file adapter_google.cpp
  * @brief Implementation of the Google Maps Geocoding API adapter.
- * @version 0.1.0
- * @date 2026-02-14
+ * @version 0.3.0
+ * @date 2026-03-31
  *
  * @author ZHENG Robert
  * @license MIT License
@@ -44,7 +44,16 @@ GoogleAdapter::parse_response(const std::string &response_body) const {
         const auto &types = comp["types"];
         if (std::find(types.begin(), types.end(), "country") != types.end()) {
           res.country_code = comp["short_name"].get<std::string>();
-          break;
+          res.attributes["country"] = comp["long_name"].get<std::string>();
+
+          // break;
+        }
+        if (std::find(types.begin(), types.end(),
+                      "administrative_area_level_1") != types.end()) {
+          res.attributes["state"] = comp["long_name"].get<std::string>();
+        }
+        if (std::find(types.begin(), types.end(), "locality") != types.end()) {
+          res.attributes["city"] = comp["long_name"].get<std::string>();
         }
       }
     }

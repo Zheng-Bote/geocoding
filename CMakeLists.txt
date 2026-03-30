@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.25)
 
+# cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+# cmake --build build -j"$(nproc)"
+
 project(regeocode
-    VERSION 1.0.0
+    VERSION 1.1.0
     DESCRIPTION "C++ Reverse Geocoding Library"
     HOMEPAGE_URL "https://github.com/Zheng-Bote/geocoding"
     LANGUAGES CXX C
@@ -97,6 +100,11 @@ option(BUILD_CLI "Build the command line interface" ON)
 if(BUILD_CLI)
     add_executable(regeocode-cli cli/main_cli.cpp)
     target_link_libraries(regeocode-cli PRIVATE regeocode::lib CLI11::CLI11)
+
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(EXIV2 REQUIRED IMPORTED_TARGET exiv2)
+    add_executable(reverse_geo_batch cli/reverse_geo.cpp)
+    target_link_libraries(reverse_geo_batch PRIVATE regeocode::lib CLI11::CLI11 PkgConfig::EXIV2)
 endif()
 
 # libs.txt Generate (timing-safe via GENERATE)

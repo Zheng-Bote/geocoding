@@ -7,15 +7,14 @@
  *
  * @file adapter_bing.cpp
  * @brief Implementation of the Bing Maps Reverse Geocoding API adapter.
- * @version 0.1.0
- * @date 2026-02-14
+ * @version 0.3.0
+ * @date 2026-03-31
  *
  * @author ZHENG Robert
  * @license MIT License
  */
 
 #include "regeocode/adapter_bing.hpp"
-#include <iostream>
 
 namespace regeocode {
 
@@ -57,6 +56,12 @@ BingAdapter::parse_response(const std::string &response_body) const {
         for (auto &[key, val] : addr.items()) {
           if (val.is_string()) {
             result.attributes[key] = val.get<std::string>();
+            if (key == "countrySubdivision") {
+              result.attributes["state"] = val.get<std::string>();
+            }
+            if (key == "municipality") {
+              result.attributes["city"] = val.get<std::string>();
+            }
           } else if (val.is_number()) {
             // Convert numbers to strings
             if (val.is_number_integer()) {
