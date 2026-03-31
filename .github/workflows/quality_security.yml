@@ -26,7 +26,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget pipx cmake ninja-build build-essential gcc-14 g++-14 libssl-dev nlohmann-json3-dev libcurl4-openssl-dev git
+          sudo apt-get install -y wget pipx cmake ninja-build build-essential gcc-14 g++-14 libssl-dev nlohmann-json3-dev libcurl4-openssl-dev libexiv2-dev git
 
       - name: Build with CMake
         run: |
@@ -49,7 +49,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libcurl4-openssl-dev wget pipx cmake ninja-build build-essential gcc-14 g++-14 libssl-dev nlohmann-json3-dev
+          sudo apt-get install -y libcurl4-openssl-dev wget pipx cmake ninja-build build-essential gcc-14 g++-14 libssl-dev nlohmann-json3-dev libexiv2-dev
 
       - name: Configure CMake (generate compile_commands.json)
         run: |
@@ -147,7 +147,7 @@ jobs:
           sudo apt-get install -y clang clang-tidy nlohmann-json3-dev \
             libcurl4-openssl-dev wget pipx cmake ninja-build build-essential \
             gcc-14 g++-14 libboost-dev libboost-system-dev libboost-date-time-dev \
-            libboost-regex-dev libboost-test-dev libssl-dev libsqlite3-dev
+            libboost-regex-dev libboost-test-dev libssl-dev libsqlite3-dev libexiv2-dev
 
       - name: Configure CMake (export compile_commands.json)
         run: |
@@ -224,7 +224,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libcurl4-openssl-dev wget pipx cmake ninja-build build-essential gcc-14 g++-14 libssl-dev nlohmann-json3-dev
+          sudo apt-get install -y libcurl4-openssl-dev wget pipx cmake ninja-build build-essential gcc-14 g++-14 libssl-dev nlohmann-json3-dev libexiv2-dev
 
       - name: Configure CMake (export compile_commands)
         run: |
