@@ -5,7 +5,7 @@
 - [Country Adapter](#country-adapter)
   - [Details](#details)
   - [Functionality](#functionality)
-    - [`get_country(std::string_view country_code)`](#get_countrystring_view-country_code)
+    - [`get_country(std::string_view country_code)`](#get_countrystdstring_view-country_code)
   - [Example](#example)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
