@@ -21,6 +21,15 @@
 
 namespace regeocode {
 
+namespace {
+std::string get_string_safe(const nlohmann::json &j, const std::string &key) {
+  if (j.contains(key) && j[key].is_string()) {
+    return j[key].get<std::string>();
+  }
+  return "";
+}
+} // namespace
+
 AddressResult
 GoogleAdapter::parse_response(const std::string &response_body) const {
   nlohmann::json j = nlohmann::json::parse(response_body);
@@ -28,32 +37,33 @@ GoogleAdapter::parse_response(const std::string &response_body) const {
   AddressResult res;
   res.raw_json = response_body;
 
-  if (j.contains("results") && !j["results"].empty()) {
+  if (j.contains("results") && j["results"].is_array() &&
+      !j["results"].empty()) {
     const auto &first = j["results"][0];
 
-    if (first.contains("formatted_address")) {
-      res.address_english = first["formatted_address"].get<std::string>();
-      res.address_local = res.address_english;
-    }
+    res.address_english = get_string_safe(first, "formatted_address");
+    res.address_local = res.address_english;
 
-    if (first.contains("address_components")) {
+    if (first.contains("address_components") &&
+        first["address_components"].is_array()) {
       for (const auto &comp : first["address_components"]) {
-        if (!comp.contains("types") || !comp.contains("short_name"))
+        if (!comp.is_object() || !comp.contains("types"))
           continue;
 
         const auto &types = comp["types"];
-        if (std::find(types.begin(), types.end(), "country") != types.end()) {
-          res.country_code = comp["short_name"].get<std::string>();
-          res.attributes["country"] = comp["long_name"].get<std::string>();
+        if (!types.is_array())
+          continue;
 
-          // break;
+        if (std::find(types.begin(), types.end(), "country") != types.end()) {
+          res.country_code = get_string_safe(comp, "short_name");
+          res.attributes["country"] = get_string_safe(comp, "long_name");
         }
         if (std::find(types.begin(), types.end(),
                       "administrative_area_level_1") != types.end()) {
-          res.attributes["state"] = comp["long_name"].get<std::string>();
+          res.attributes["state"] = get_string_safe(comp, "long_name");
         }
         if (std::find(types.begin(), types.end(), "locality") != types.end()) {
-          res.attributes["city"] = comp["long_name"].get<std::string>();
+          res.attributes["city"] = get_string_safe(comp, "long_name");
         }
       }
     }

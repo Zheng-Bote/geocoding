@@ -68,6 +68,7 @@ add_library(regeocode
     src/adapter_marea_tides.cpp
     src/adapter_tides.cpp
     src/adapter_seaweather.cpp
+    src/adapter_country.cpp
     src/quota_manager.cpp
 )
 
@@ -172,4 +173,10 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reverse_geocode.cpp")
     add_executable(test_reverse_geocode tests/test_reverse_geocode.cpp)
     target_link_libraries(test_reverse_geocode PRIVATE regeocode::lib)
     add_test(NAME reverse_geocode_test COMMAND test_reverse_geocode)
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_country_adapter.cpp")
+    add_executable(test_country_adapter tests/test_country_adapter.cpp)
+    target_link_libraries(test_country_adapter PRIVATE regeocode::lib)
+    add_test(NAME country_adapter_test COMMAND test_country_adapter)
 endif()

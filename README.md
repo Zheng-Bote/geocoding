@@ -14,33 +14,36 @@ Reverse Geocoding Library designed for high-availability applications. It unifie
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
-- [Description](#description)
-- [🚀 Key Features](#-key-features)
-- [🏗 Architecture](#-architecture)
-  - [Supported Adapters](#supported-adapters)
-- [🛠 Build and Installation](#-build-and-installation)
-  - [Prerequisites](#prerequisites)
-  - [Dependencies](#dependencies)
-  - [Building from Source](#building-from-source)
-  - [Installation (Using Make)](#installation-using-make)
-  - [Installation (Using Conan)](#installation-using-conan)
-    - [Uploading to a Conan Remote](#uploading-to-a-conan-remote)
-  - [⚙️ Configuration (INI)](#-configuration-ini)
-- [💻 Usage Examples](#-usage-examples)
-  - [1. Command Line Interface (CLI)](#1-command-line-interface-cli)
-    - [Using a Fallback Strategy](#using-a-fallback-strategy)
-    - [Batch Processing](#batch-processing)
-  - [2. C++ API](#2-c-api)
-  - [3. Python Integration (via C-API)](#3-python-integration-via-c-api)
-- [🛡 Advanced Features](#-advanced-features)
-  - [Circuit Breaker & Fallback](#circuit-breaker--fallback)
-  - [Quota Management](#quota-management)
-  - [Async Batching](#async-batching)
-- [📝 License](#-license)
-- [Author](#author)
-  - [Code Contributors](#code-contributors)
+- [re-geocode](#re-geocode)
+  - [Description](#description)
+  - [🚀 Key Features](#-key-features)
+  - [🏗 Architecture](#-architecture)
+    - [Supported Adapters](#supported-adapters)
+  - [🛠 Build and Installation](#-build-and-installation)
+    - [Prerequisites](#prerequisites)
+    - [Dependencies](#dependencies)
+    - [Building from Source](#building-from-source)
+    - [Installation (Using Make)](#installation-using-make)
+    - [Installation (Using Conan)](#installation-using-conan)
+      - [Uploading to a Conan Remote](#uploading-to-a-conan-remote)
+    - [⚙️ Configuration (INI)](#️-configuration-ini)
+  - [💻 Usage Examples](#-usage-examples)
+    - [1. Command Line Interface (CLI)](#1-command-line-interface-cli)
+      - [Using a Fallback Strategy](#using-a-fallback-strategy)
+      - [Batch Processing](#batch-processing)
+    - [2. C++ API](#2-c-api)
+    - [3. Python Integration (via C-API)](#3-python-integration-via-c-api)
+  - [🛡 Advanced Features](#-advanced-features)
+    - [Circuit Breaker \& Fallback](#circuit-breaker--fallback)
+    - [Quota Management](#quota-management)
+    - [Async Batching](#async-batching)
+  - [📝 License](#-license)
+  - [Author](#author)
+    - [see also](#see-also)
+    - [Code Contributors](#code-contributors)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -105,6 +108,7 @@ graph TD
 | Pollution   | info      | Air quality index (AQI) and components      |
 | Tides       | info      | Tide predictions (High/Low tides)           |
 | SeaWeather  | info      | Maritime weather (Wave height, Water temp)  |
+| Country     | local     | Local country data (ISO 3166-1)             |
 
 ## 🛠 Build and Installation
 
@@ -357,6 +361,14 @@ Copyright (c) 2026 ZHENG Robert.
 ## Author
 
 [![Zheng Robert - Core Development](https://img.shields.io/badge/Github-Zheng_Robert-black?logo=github)](https://www.github.com/Zheng-Bote)
+
+### see also
+
+many thansk to
+
+[A curated collection of all country flags in SVG](https://github.com/lipis/flag-icons)
+
+[World countries in JSON, YAML, CSV and XML](https://github.com/mledoze/countries)
 
 ### Code Contributors
 

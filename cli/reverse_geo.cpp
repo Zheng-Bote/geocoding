@@ -53,6 +53,7 @@
 
 // Adapter Headers (wie in deiner Codebasis)
 #include "regeocode/adapter_bing.hpp"
+#include "regeocode/adapter_country.hpp"
 #include "regeocode/adapter_geonames_timezone.hpp"
 #include "regeocode/adapter_geonames_wikipedia.hpp"
 #include "regeocode/adapter_google.hpp"
@@ -230,6 +231,7 @@ async_reverse_geocode_cached(regeocode::ReverseGeocoder &geocoder, double lat,
 static void
 process_image_file(const fs::path &file_path,
                    regeocode::ReverseGeocoder &geocoder,
+                   const regeocode::CountryAdapter &country_adapter,
                    const std::vector<std::string> &priority_list,
                    const std::string &lang_override,
                    const std::optional<std::string> &copyright_opt) {
@@ -302,14 +304,31 @@ process_image_file(const fs::path &file_path,
             subjects = country_code + ",";
             iptcData["Iptc.Application2.CountryCode"] = country_code;
             xmpData["Xmp.photoshop.CountryCode"] = country_code;
+
+            // Fetch additional country info from local adapter
+            auto country_info = country_adapter.get_country(country_code);
+            if (!country_info.empty()) {
+              std::string country_name = country_info.value("name.common", "");
+              std::string region = country_info.value("region", "");
+
+              if (!country_name.empty()) {
+                xmpData["Xmp.photoshop.Country"] = country_name;
+              }
+              if (!region.empty()) {
+                xmpData["Xmp.photoshop.continent"] = region;
+              }
+            }
           }
 
           if (res.contains("attributes") && res["attributes"].is_object()) {
             auto &attr = res["attributes"];
             if (attr.contains("country") && attr["country"].is_string()) {
-
               country = attr["country"].get<std::string>();
-              xmpData["Xmp.photoshop.Country"] = country;
+              // Only write if not already set by CountryAdapter
+              if (xmpData.findKey(Exiv2::XmpKey("Xmp.photoshop.Country")) ==
+                  xmpData.end()) {
+                xmpData["Xmp.photoshop.Country"] = country;
+              }
               subjects += country + ",";
               iptcData["Iptc.Application2.Country"] = country;
             }
@@ -337,8 +356,6 @@ process_image_file(const fs::path &file_path,
           auto tz_future = async_reverse_geocode_cached(geocoder, lat, lon, tz,
                                                         lang_override);
           nlohmann::json timezone_result = tz_future.get();
-          std::cout << "timezone_result: " << timezone_result.dump()
-                    << std::endl;
 
           std::string timezone = "";
           if (timezone_result.contains("result") &&
@@ -358,9 +375,6 @@ process_image_file(const fs::path &file_path,
           xmpData["Xmp.dc.AddressLocal"] = address_local;
         if (!country_code.empty())
           xmpData["Xmp.dc.CountryCode"] = country_code;
-
-        std::cout << "  Reverse-geocode result: " << address_local << " / "
-                  << country_code << std::endl;
       }
     }
 
@@ -395,6 +409,7 @@ process_image_file(const fs::path &file_path,
 
 static void process_folder(const fs::path &folder, bool recursive,
                            regeocode::ReverseGeocoder &geocoder,
+                           const regeocode::CountryAdapter &country_adapter,
                            const std::vector<std::string> &priority_list,
                            const std::string &lang_override,
                            const std::optional<std::string> &copyright_opt) {
@@ -420,7 +435,8 @@ static void process_folder(const fs::path &folder, bool recursive,
   // Parallel processing: each file processed independently
   std::for_each(std::execution::par, files.begin(), files.end(),
                 [&](const fs::path &p) {
-                  process_image_file(p, geocoder, priority_list, lang_override,
+                  process_image_file(p, geocoder, country_adapter,
+                                     priority_list, lang_override,
                                      copyright_opt);
                 });
 }
@@ -489,6 +505,9 @@ int main(int argc, char **argv) {
                                         std::move(adapters), std::move(client),
                                         config_result.quota_file_path);
 
+    // Instantiate CountryAdapter for local info (used in image processing)
+    regeocode::CountryAdapter country_adapter("data/countries.json");
+
     // Priority list logic (--api overrides --strategy)
     std::vector<std::string> priority_list;
     if (!api_name.empty()) {
@@ -502,8 +521,8 @@ int main(int argc, char **argv) {
       std::optional<std::string> cp_opt =
           copyright_text.empty() ? std::nullopt
                                  : std::optional<std::string>(copyright_text);
-      process_folder(fs::path(folder_path), recursive, geocoder, priority_list,
-                     lang_override, cp_opt);
+      process_folder(fs::path(folder_path), recursive, geocoder,
+                     country_adapter, priority_list, lang_override, cp_opt);
       return 0;
     }
 

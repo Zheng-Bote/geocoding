@@ -246,6 +246,7 @@ AddressResult ReverseGeocoder::reverse_geocode_dual_language(
     std::string local_lang = language_from_country(en.country_code);
     auto local = reverse_geocode(coords, api_name, local_lang);
     result.address_local = local.address_english;
+
   } else {
     result.address_local.clear();
   }

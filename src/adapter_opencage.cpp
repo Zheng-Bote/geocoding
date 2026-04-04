@@ -20,10 +20,14 @@
 
 namespace regeocode {
 
-static inline std::string default_if_empty(const std::string &s,
-                                           const std::string &def) {
-  return s.empty() ? def : s;
+namespace {
+std::string get_string_safe(const nlohmann::json &j, const std::string &key) {
+  if (j.contains(key) && j[key].is_string()) {
+    return j[key].get<std::string>();
+  }
+  return "";
 }
+} // namespace
 
 AddressResult
 OpenCageAdapter::parse_response(const std::string &response_body) const {
@@ -32,32 +36,26 @@ OpenCageAdapter::parse_response(const std::string &response_body) const {
   AddressResult res;
   res.raw_json = response_body;
 
-  if (j.contains("results") && !j["results"].empty()) {
+  if (j.contains("results") && j["results"].is_array() &&
+      !j["results"].empty()) {
     const auto &first = j["results"][0];
 
-    if (first.contains("formatted")) {
-      res.address_english = first["formatted"].get<std::string>();
-      res.address_local = res.address_english;
-    }
+    res.address_english = get_string_safe(first, "formatted");
+    res.address_local = res.address_english;
 
-    if (first.contains("components") &&
-        first["components"].contains("country_code")) {
-      res.country_code = first["components"]["country_code"].get<std::string>();
+    if (first.contains("components") && first["components"].is_object()) {
+      const auto &comp = first["components"];
+      res.country_code = get_string_safe(comp, "country_code");
+      res.attributes["continent"] = get_string_safe(comp, "continent");
+      res.attributes["country"] = get_string_safe(comp, "country");
+      res.attributes["state"] = get_string_safe(comp, "state");
 
-      res.attributes["continent"] = default_if_empty(
-          first["components"]["continent"].get<std::string>(), "");
-      res.attributes["country"] = default_if_empty(
-          first["components"]["country"].get<std::string>(), "");
-
-      if (first["components"].contains("state")) {
-        res.attributes["state"] = default_if_empty(
-            first["components"]["state"].get<std::string>(), "");
-      } else {
-        res.attributes["state"] = "";
-      }
-      if (first["components"].contains("city")) {
-        res.attributes["city"] = default_if_empty(
-            first["components"]["city"].get<std::string>(), "");
+      if (comp.contains("city")) {
+        res.attributes["city"] = get_string_safe(comp, "city");
+      } else if (comp.contains("town")) {
+        res.attributes["city"] = get_string_safe(comp, "town");
+      } else if (comp.contains("village")) {
+        res.attributes["city"] = get_string_safe(comp, "village");
       } else {
         res.attributes["city"] = "";
       }

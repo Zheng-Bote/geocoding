@@ -25,6 +25,7 @@ This document provides an overview of the available API adapters in the `regeoco
 - [Marea Tides](ADAPTER_MAREA_TIDES.md)
 - [GeoNames Timezone](ADAPTER_GEONAMES_TIMEZONE.md)
 - [GeoNames Wikipedia](ADAPTER_GEONAMES_WIKIPEDIA.md)
+- [Country Data](ADAPTER_COUNTRY.md)
 
 ## Common Interface
 

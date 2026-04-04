@@ -20,6 +20,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-04-04
+
+### Added
+
+- **CountryAdapter**: Introduced a local adapter to fetch country details (name, capital, region, flag) from `data/countries.json` using ISO codes.
+- **Image Metadata Enrichment**: Extended `cli/reverse_geo.cpp` to write `Xmp.photoshop.continent` (region) and `Xmp.photoshop.Country` (official/common name) using the new CountryAdapter.
+- **Flag URL Support**: Added `flag_url` field to country data, linking to high-quality SVG flag icons.
+- **Testing**: Added `tests/test_country_adapter.cpp` to verify local country data lookup.
+
+### Fixed
+
+- **JSON Robustness**: Improved `NominatimAdapter`, `GoogleAdapter`, and `OpenCageAdapter` to safely handle null or missing fields in API responses, preventing potential crashes.
+
+### Changed
+
+- Updated documentation in `README.md` and `docs/adapter/` to include the new Country adapter.
+
 ## [1.0.0] - 2026-03-14
 
 ### Added
