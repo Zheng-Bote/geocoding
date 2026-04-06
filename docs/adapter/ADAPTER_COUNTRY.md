@@ -6,14 +6,12 @@ The `CountryAdapter` provides access to country information stored in a local JS
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
 **Table of Contents**
 
-- [Country Adapter](#country-adapter)
-  - [Details](#details)
-  - [Functionality](#functionality)
-    - [`get_country(std::string_view country_code)`](#get_countrystdstring_view-country_code)
-  - [Example](#example)
+- [Details](#details)
+- [Functionality](#functionality)
+  - [`get_country(std::string_view country_code)`](#get_countrystdstring_view-country_code)
+- [Example](#example)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 

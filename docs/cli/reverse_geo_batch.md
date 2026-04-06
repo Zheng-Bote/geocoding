@@ -1,3 +1,18 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [reverse_geo_batch Documentation](#reverse_geo_batch-documentation)
+  - [Key Features](#key-features)
+  - [Usage](#usage)
+  - [CLI Parameters](#cli-parameters)
+  - [Architecture](#architecture)
+  - [Metadata Mapping](#metadata-mapping)
+    - [Primary Fields (Geocoding & Identity)](#primary-fields-geocoding--identity)
+    - [Location Detail Fields (Photoshop/IPTC Standard)](#location-detail-fields-photoshopiptc-standard)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # reverse_geo_batch Documentation
 
 `reverse_geo_batch` is a high-performance, parallelized tool for embedding reverse geocoding data and rich country information directly into image metadata (EXIF/IPTC/XMP).

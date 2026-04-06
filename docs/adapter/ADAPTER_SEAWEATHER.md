@@ -6,15 +6,13 @@ The `SeaWeatherAdapter` provides support for specialized maritime weather APIs.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
 **Table of Contents**
 
-- [SeaWeather Adapter](#seaweather-adapter)
-  - [Details](#details)
-  - [Functionality](#functionality)
-    - [`name()`](#name)
-    - [`parse_response(const std::string &response_body)`](#parse_responseconst-stdstring-response_body)
-  - [Example](#example)
+- [Details](#details)
+- [Functionality](#functionality)
+  - [`name()`](#name)
+  - [`parse_response(const std::string &response_body)`](#parse_responseconst-stdstring-response_body)
+- [Example](#example)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 

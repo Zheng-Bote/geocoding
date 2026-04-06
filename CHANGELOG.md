@@ -3,16 +3,19 @@
 **Table of Contents**
 
 - [Changelog](#changelog)
-  - [[1.1.0] - 2026-04-04](#110---2026-04-04)
+  - [[1.2.0] - 2026-04-06](#120---2026-04-06)
     - [Added](#added)
-    - [Fixed](#fixed)
     - [Changed](#changed)
-  - [[1.0.0] - 2026-03-14](#100---2026-03-14)
+  - [[1.1.0] - 2026-04-04](#110---2026-04-04)
     - [Added](#added-1)
+    - [Fixed](#fixed)
     - [Changed](#changed-1)
-  - [[0.1.0] - 2026-02-14](#010---2026-02-14)
+  - [[1.0.0] - 2026-03-14](#100---2026-03-14)
     - [Added](#added-2)
     - [Changed](#changed-2)
+  - [[0.1.0] - 2026-02-14](#010---2026-02-14)
+    - [Added](#added-3)
+    - [Changed](#changed-3)
     - [Fixed](#fixed-1)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->

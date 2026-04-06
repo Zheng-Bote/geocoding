@@ -6,14 +6,12 @@ The `CountryInfoAdapter` provides access to detailed country information from th
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
 **Table of Contents**
 
-- [Country Info Adapter](#country-info-adapter)
-  - [Details](#details)
-  - [Configuration](#configuration)
-  - [Functionality](#functionality)
-  - [Example Result](#example-result)
+- [Details](#details)
+- [Configuration](#configuration)
+- [Functionality](#functionality)
+- [Example Result](#example-result)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 

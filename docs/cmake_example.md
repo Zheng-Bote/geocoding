@@ -4,15 +4,9 @@
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
 **Table of Contents**
 
-- [Bing Maps Adapter](#bing-maps-adapter)
-  - [Details](#details)
-  - [Functionality](#functionality)
-    - [`name()`](#name)
-    - [`parse_response(const std::string &response_body)`](#parse_responseconst-stdstring-response_body)
-  - [Example](#example)
+- [Integration via CMake FetchContent](#integration-via-cmake-fetchcontent)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
