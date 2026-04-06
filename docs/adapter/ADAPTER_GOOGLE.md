@@ -1,5 +1,12 @@
+# Google Maps Adapter
+
+The `GoogleAdapter` provides support for the Google Maps Geocoding API.
+
+---
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [Google Maps Adapter](#google-maps-adapter)
@@ -11,9 +18,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Google Maps Adapter
-
-The `GoogleAdapter` provides support for the Google Maps Geocoding API.
+---
 
 ## Details
 

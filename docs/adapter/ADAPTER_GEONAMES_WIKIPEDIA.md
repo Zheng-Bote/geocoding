@@ -1,5 +1,12 @@
+# GeoNames Wikipedia Adapter
+
+The `GeoNamesWikipediaAdapter` provides support for the GeoNames Wikipedia API, which finds Wikipedia entries near a specific location.
+
+---
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [GeoNames Wikipedia Adapter](#geonames-wikipedia-adapter)
@@ -11,9 +18,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# GeoNames Wikipedia Adapter
-
-The `GeoNamesWikipediaAdapter` provides support for the GeoNames Wikipedia API, which finds Wikipedia entries near a specific location.
+---
 
 ## Details
 

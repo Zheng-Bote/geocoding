@@ -1,14 +1,15 @@
-# re-geocode
+<div id="top" align="center">
+<h1>re-geocode</h1>
 
-Reverse Geocoding Library designed for high-availability applications. It unifies multiple providers (Google, OSM, OpenCage, Bing, etc.) and specialized information services (Weather, Tides, Pollution)
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![C++23](https://img.shields.io/badge/C%2B%2B-23-blue.svg)]()
-[![CMake](https://img.shields.io/badge/CMake-3.23+-blue.svg)]()
-
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/Zheng-Bote/geocoding?logo=GitHub)](https://github.com/Zheng-Bote/geocoding/releases)
+<p>High‑availability reverse‑geocoding library and tools that unifies multiple providers (Google, OSM, OpenCage, Bing, etc.) and integrates additional data services such as weather, tides, and pollution.</p>
 
 [Report Issue](https://github.com/Zheng-Bote/geocoding/issues) · [Request Feature](https://github.com/Zheng-Bote/geocoding/pulls)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/Zheng-Bote/geocoding?logo=GitHub)](https://github.com/Zheng-Bote/geocoding/releases)
+
+</div>
 
 ---
 
@@ -17,39 +18,41 @@ Reverse Geocoding Library designed for high-availability applications. It unifie
 
 **Table of Contents**
 
-- [re-geocode](#re-geocode)
-  - [Description](#description)
-  - [🚀 Key Features](#-key-features)
-  - [🏗 Architecture](#-architecture)
-    - [Supported Adapters](#supported-adapters)
-  - [🛠 Build and Installation](#-build-and-installation)
-    - [Prerequisites](#prerequisites)
-    - [Dependencies](#dependencies)
-    - [Building from Source](#building-from-source)
-    - [Installation (Using Make)](#installation-using-make)
-    - [Installation (Using Conan)](#installation-using-conan)
-      - [Uploading to a Conan Remote](#uploading-to-a-conan-remote)
-    - [⚙️ Configuration (INI)](#️-configuration-ini)
-  - [💻 Usage Examples](#-usage-examples)
-    - [1. Command Line Interface (CLI)](#1-command-line-interface-cli)
-      - [Using a Fallback Strategy](#using-a-fallback-strategy)
-      - [Batch Processing](#batch-processing)
-    - [2. C++ API](#2-c-api)
-    - [3. Python Integration (via C-API)](#3-python-integration-via-c-api)
-  - [🛡 Advanced Features](#-advanced-features)
-    - [Circuit Breaker \& Fallback](#circuit-breaker--fallback)
-    - [Quota Management](#quota-management)
-    - [Async Batching](#async-batching)
-  - [📝 License](#-license)
-  - [Author](#author)
-    - [see also](#see-also)
-    - [Code Contributors](#code-contributors)
+- [Description](#description)
+- [🚀 Key Features](#-key-features)
+- [🏗 Architecture](#-architecture)
+  - [Supported Adapters](#supported-adapters)
+- [🛠 Build and Installation](#-build-and-installation)
+  - [Prerequisites](#prerequisites)
+  - [Dependencies](#dependencies)
+  - [Building from Source](#building-from-source)
+  - [Installation (Using Make)](#installation-using-make)
+  - [Installation (Using Conan)](#installation-using-conan)
+    - [Uploading to a Conan Remote](#uploading-to-a-conan-remote)
+  - [⚙️ Configuration (INI)](#️-configuration-ini)
+- [💻 Usage Examples](#-usage-examples)
+  - [1. Command Line Interface (CLI)](#1-command-line-interface-cli)
+    - [Using a Fallback Strategy](#using-a-fallback-strategy)
+    - [Batch Processing](#batch-processing)
+  - [2. C++ API](#2-c-api)
+  - [3. Python Integration (via C-API)](#3-python-integration-via-c-api)
+- [🛡 Advanced Features](#-advanced-features)
+  - [Circuit Breaker \& Fallback](#circuit-breaker--fallback)
+  - [Quota Management](#quota-management)
+  - [Async Batching](#async-batching)
+- [📝 License](#-license)
+- [Author](#author)
+  - [see also](#see-also)
+  - [Code Contributors](#code-contributors)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ---
 
 ## Description
+
+[![C++23](https://img.shields.io/badge/C%2B%2B-23-blue.svg)]()
+[![CMake](https://img.shields.io/badge/CMake-3.23+-blue.svg)]()
 
 A modern, resilient **C++23 Reverse Geocoding Library** designed for high-availability applications. It unifies multiple providers (Google, OSM, OpenCage, Bing, etc.) and specialized information services (Weather, Tides, Pollution) into a single, robust interface.
 
@@ -109,6 +112,7 @@ graph TD
 | Tides       | info      | Tide predictions (High/Low tides)           |
 | SeaWeather  | info      | Maritime weather (Wave height, Water temp)  |
 | Country     | local     | Local country data (ISO 3166-1)             |
+| CountryInfo | info      | RestCountries API (Rich metadata)           |
 
 ## 🛠 Build and Installation
 
@@ -366,9 +370,9 @@ Copyright (c) 2026 ZHENG Robert.
 
 many thansk to
 
-[A curated collection of all country flags in SVG](https://github.com/lipis/flag-icons)
-
-[World countries in JSON, YAML, CSV and XML](https://github.com/mledoze/countries)
+- [A curated collection of all country flags in SVG](https://github.com/lipis/flag-icons)
+- [World countries in JSON, YAML, CSV and XML](https://github.com/mledoze/countries)
+- [Get information about countries via a RESTful API](https://restcountries.com/)
 
 ### Code Contributors
 

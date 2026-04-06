@@ -25,6 +25,7 @@
 
 // Adapter Headers
 #include "regeocode/adapter_bing.hpp"
+#include "regeocode/adapter_country_info.hpp"
 #include "regeocode/adapter_geonames_timezone.hpp"
 #include "regeocode/adapter_geonames_wikipedia.hpp"
 #include "regeocode/adapter_google.hpp"
@@ -104,6 +105,7 @@ int main(int argc, char **argv) {
     adapters.push_back(std::make_unique<regeocode::GoogleAdapter>());
     adapters.push_back(std::make_unique<regeocode::OpenCageAdapter>());
     adapters.push_back(std::make_unique<regeocode::BingAdapter>());
+    adapters.push_back(std::make_unique<regeocode::CountryInfoAdapter>());
     adapters.push_back(std::make_unique<regeocode::GeoNamesTimezoneAdapter>());
     adapters.push_back(std::make_unique<regeocode::GeoNamesWikipediaAdapter>());
     adapters.push_back(std::make_unique<regeocode::OpenWeatherAdapter>());

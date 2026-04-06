@@ -1,15 +1,22 @@
+# re-geocode pkg-config example
+
+---
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
-- [re-geocode pkg-config example](#re-geocode-pkg-config-example)
-  - [Usage via pkg-config (for Makefiles or Terminal)](#usage-via-pkg-config-for-makefiles-or-terminal)
-    - [A. Directly in the Terminal (Quick & Dirty)](#a-directly-in-the-terminal-quick--dirty)
-    - [B. Integration into a classic Makefile](#b-integration-into-a-classic-makefile)
+- [Bing Maps Adapter](#bing-maps-adapter)
+  - [Details](#details)
+  - [Functionality](#functionality)
+    - [`name()`](#name)
+    - [`parse_response(const std::string &response_body)`](#parse_responseconst-stdstring-response_body)
+  - [Example](#example)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# re-geocode pkg-config example
+---
 
 ## Usage via pkg-config (for Makefiles or Terminal)
 

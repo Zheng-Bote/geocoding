@@ -35,6 +35,7 @@ namespace regeocode {
 struct Coordinates {
   double latitude;  ///< Latitude.
   double longitude; ///< Longitude.
+  std::string country_code; ///< Optional country code.
 };
 
 /**

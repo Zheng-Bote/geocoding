@@ -1,5 +1,12 @@
+# OpenCage Data Adapter
+
+The `OpenCageAdapter` provides support for the OpenCage Data Geocoding API.
+
+---
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [OpenCage Data Adapter](#opencage-data-adapter)
@@ -11,9 +18,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# OpenCage Data Adapter
-
-The `OpenCageAdapter` provides support for the OpenCage Data Geocoding API.
+---
 
 ## Details
 

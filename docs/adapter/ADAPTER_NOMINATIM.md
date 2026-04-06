@@ -1,5 +1,12 @@
+# Nominatim Adapter
+
+The `NominatimAdapter` provides support for the Nominatim Reverse Geocoding API (OpenStreetMap).
+
+---
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [Nominatim Adapter](#nominatim-adapter)
@@ -11,9 +18,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Nominatim Adapter
-
-The `NominatimAdapter` provides support for the Nominatim Reverse Geocoding API (OpenStreetMap).
+---
 
 ## Details
 

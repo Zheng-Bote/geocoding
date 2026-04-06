@@ -1,5 +1,12 @@
+# Tides API Adapter
+
+The `TidesAdapter` provides support for retrieving tidal information.
+
+---
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [Tides API Adapter](#tides-api-adapter)
@@ -11,9 +18,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Tides API Adapter
-
-The `TidesAdapter` provides support for retrieving tidal information.
+---
 
 ## Details
 

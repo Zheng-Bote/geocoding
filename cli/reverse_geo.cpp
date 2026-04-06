@@ -54,6 +54,7 @@
 // Adapter Headers (wie in deiner Codebasis)
 #include "regeocode/adapter_bing.hpp"
 #include "regeocode/adapter_country.hpp"
+#include "regeocode/adapter_country_info.hpp"
 #include "regeocode/adapter_geonames_timezone.hpp"
 #include "regeocode/adapter_geonames_wikipedia.hpp"
 #include "regeocode/adapter_google.hpp"
@@ -228,16 +229,67 @@ async_reverse_geocode_cached(regeocode::ReverseGeocoder &geocoder, double lat,
    Einzeldatei-Verarbeitung
    --------------------------- */
 
+static std::string get_image_timestamp(const fs::path &file_path,
+                                        const Exiv2::ExifData &exifData) {
+  // 1. Try GPS Date/Time
+  auto itDate = exifData.findKey(Exiv2::ExifKey("Exif.GPSInfo.GPSDateStamp"));
+  auto itTime = exifData.findKey(Exiv2::ExifKey("Exif.GPSInfo.GPSTimeStamp"));
+
+  if (itDate != exifData.end() && itTime != exifData.end()) {
+    std::string date_str = itDate->toString(); // YYYY:MM:DD
+    std::replace(date_str.begin(), date_str.end(), ':', '-');
+    
+    // GPS Time is often 3 rationals
+    std::string time_raw = itTime->toString();
+    std::stringstream ss(time_raw);
+    std::vector<std::string> parts;
+    std::string token;
+    while (ss >> token) parts.push_back(token);
+    
+    if (parts.size() >= 3) {
+      int h = static_cast<int>(rational_token_to_double(parts[0]));
+      int m = static_cast<int>(rational_token_to_double(parts[1]));
+      int s = static_cast<int>(rational_token_to_double(parts[2]));
+      char time_buf[20];
+      std::snprintf(time_buf, sizeof(time_buf), "%02d%02d%02d", h, m, s);
+      return date_str + "_" + time_buf;
+    }
+  }
+
+  // 2. Fallback to Exif.Photo.DateTimeOriginal
+  auto itOrig = exifData.findKey(Exiv2::ExifKey("Exif.Photo.DateTimeOriginal"));
+  if (itOrig != exifData.end()) {
+    std::string ts = itOrig->toString(); // YYYY:MM:DD HH:MM:SS
+    if (ts.length() >= 19) {
+      std::string date = ts.substr(0, 10);
+      std::replace(date.begin(), date.end(), ':', '-');
+      std::string time = ts.substr(11, 2) + ts.substr(14, 2) + ts.substr(17, 2);
+      return date + "_" + time;
+    }
+  }
+
+  // 3. Fallback to File System Time
+  auto ftime = fs::last_write_time(file_path);
+  auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+      ftime - fs::file_time_type::clock::now() + std::chrono::system_clock::now());
+  std::time_t tt = std::chrono::system_clock::to_time_t(sctp);
+  std::tm *gmt = std::gmtime(&tt);
+  char buf[32];
+  std::strftime(buf, sizeof(buf), "%Y-%m-%d_%H%M%S", gmt);
+  return std::string(buf);
+}
+
 static void
 process_image_file(const fs::path &file_path,
                    regeocode::ReverseGeocoder &geocoder,
-                   const regeocode::CountryAdapter &country_adapter,
                    const std::vector<std::string> &priority_list,
                    const std::string &lang_override,
-                   const std::optional<std::string> &copyright_opt) {
+                   const std::optional<std::string> &copyright_opt,
+                   bool rename_mode) {
   try {
-    std::cout << "Processing: " << file_path << std::endl;
-    auto image = Exiv2::ImageFactory::open(file_path.string());
+    fs::path current_path = file_path;
+    std::cout << "Processing: " << current_path << std::endl;
+    auto image = Exiv2::ImageFactory::open(current_path.string());
     if (!image.get()) {
       std::cerr << "  Unable to open image: " << file_path << std::endl;
       return;
@@ -247,6 +299,18 @@ process_image_file(const fs::path &file_path,
     Exiv2::ExifData &exifData = image->exifData();
     Exiv2::IptcData &iptcData = image->iptcData();
     Exiv2::XmpData &xmpData = image->xmpData();
+
+    // -------------------------
+    // TITLE FROM FILENAME
+    // -------------------------
+    std::string stem = current_path.stem().string();
+    if (!stem.empty()) {
+      // Replace underscores with spaces
+      std::replace(stem.begin(), stem.end(), '_', ' ');
+      // Write to Xmp.dc.title (standard Title field)
+      // Note: Xmp.dc.title is a LangAlt field, lang="x-default" is common
+      xmpData["Xmp.dc.title"] = "lang=\"x-default\" " + stem;
+    }
 
     // GPS keys
     auto itLat = exifData.findKey(Exiv2::ExifKey("Exif.GPSInfo.GPSLatitude"));
@@ -284,8 +348,6 @@ process_image_file(const fs::path &file_path,
         auto geo_future = async_reverse_geocode_cached(
             geocoder, lat, lon, priority_list, lang_override);
 
-        // Meanwhile we could do other lightweight work here (not necessary)
-
         // Wait for result
         nlohmann::json result = geo_future.get();
 
@@ -305,17 +367,36 @@ process_image_file(const fs::path &file_path,
             iptcData["Iptc.Application2.CountryCode"] = country_code;
             xmpData["Xmp.photoshop.CountryCode"] = country_code;
 
-            // Fetch additional country info from local adapter
-            auto country_info = country_adapter.get_country(country_code);
-            if (!country_info.empty()) {
-              std::string country_name = country_info.value("name.common", "");
-              std::string region = country_info.value("region", "");
+            // Fetch additional country info from country_info adapter
+            const std::vector<std::string> ci_strat = {"country_info"};
+            regeocode::Coordinates ci_coords{lat, lon, country_code};
+            auto ci_result = geocoder.reverse_geocode_fallback(ci_coords, ci_strat, lang_override);
 
-              if (!country_name.empty()) {
-                xmpData["Xmp.photoshop.Country"] = country_name;
-              }
-              if (!region.empty()) {
-                xmpData["Xmp.photoshop.continent"] = region;
+            if (ci_result.contains("result") && ci_result["result"].is_object()) {
+              auto &ci_res = ci_result["result"];
+              if (ci_res.contains("data") && ci_res["data"].is_object()) {
+                auto &ci_attr = ci_res["data"];
+                
+                // Xmp.photoshop.Continent
+                if (ci_attr.contains("continents") && ci_attr["continents"].is_string()) {
+                  xmpData["Xmp.photoshop.Continent"] = ci_attr["continents"].get<std::string>();
+                }
+                // Xmp.photoshop.Country
+                if (ci_attr.contains("name_common") && ci_attr["name_common"].is_string()) {
+                  xmpData["Xmp.photoshop.Country"] = ci_attr["name_common"].get<std::string>();
+                }
+                // Xmp.photoshop.Cca2
+                if (ci_attr.contains("cca2") && ci_attr["cca2"].is_string()) {
+                  xmpData["Xmp.photoshop.Cca2"] = ci_attr["cca2"].get<std::string>();
+                }
+                // Xmp.photoshop.Cca3
+                if (ci_attr.contains("cca3") && ci_attr["cca3"].is_string()) {
+                  xmpData["Xmp.photoshop.Cca3"] = ci_attr["cca3"].get<std::string>();
+                }
+                // Xmp.photoshop.Capital
+                if (ci_attr.contains("capital") && ci_attr["capital"].is_string()) {
+                  xmpData["Xmp.photoshop.Capital"] = ci_attr["capital"].get<std::string>();
+                }
               }
             }
           }
@@ -324,7 +405,7 @@ process_image_file(const fs::path &file_path,
             auto &attr = res["attributes"];
             if (attr.contains("country") && attr["country"].is_string()) {
               country = attr["country"].get<std::string>();
-              // Only write if not already set by CountryAdapter
+              // Only write if not already set by country_info
               if (xmpData.findKey(Exiv2::XmpKey("Xmp.photoshop.Country")) ==
                   xmpData.end()) {
                 xmpData["Xmp.photoshop.Country"] = country;
@@ -346,6 +427,7 @@ process_image_file(const fs::path &file_path,
             }
           }
         }
+
 
         // -------------------------
         // Timezone block (optimized & robust)
@@ -394,6 +476,31 @@ process_image_file(const fs::path &file_path,
     image->setXmpData(xmpData);
     image->writeMetadata();
 
+    // -------------------------
+    // RENAME BLOCK
+    // -------------------------
+    if (rename_mode) {
+      std::string timestamp = get_image_timestamp(current_path, exifData);
+      std::string ext = current_path.extension().string();
+      std::transform(ext.begin(), ext.end(), ext.begin(),
+                     [](unsigned char c) { return std::tolower(c); });
+
+      fs::path new_path = current_path.parent_path() / (timestamp + ext);
+
+      // Avoid overwriting existing files
+      int counter = 1;
+      while (fs::exists(new_path) && new_path != current_path) {
+        new_path = current_path.parent_path() /
+                   (timestamp + "_" + std::to_string(counter++) + ext);
+      }
+
+      if (new_path != current_path) {
+        fs::rename(current_path, new_path);
+        std::cout << "  Renamed: " << current_path.filename() << " -> "
+                  << new_path.filename() << std::endl;
+      }
+    }
+
   } catch (const Exiv2::Error &e) {
     std::cerr << "  Exiv2 error for file " << file_path << ": " << e.what()
               << std::endl;
@@ -409,10 +516,10 @@ process_image_file(const fs::path &file_path,
 
 static void process_folder(const fs::path &folder, bool recursive,
                            regeocode::ReverseGeocoder &geocoder,
-                           const regeocode::CountryAdapter &country_adapter,
                            const std::vector<std::string> &priority_list,
                            const std::string &lang_override,
-                           const std::optional<std::string> &copyright_opt) {
+                           const std::optional<std::string> &copyright_opt,
+                           bool rename_mode) {
   if (!fs::exists(folder) || !fs::is_directory(folder)) {
     std::cerr << "Folder does not exist or is not a directory: " << folder
               << std::endl;
@@ -435,9 +542,9 @@ static void process_folder(const fs::path &folder, bool recursive,
   // Parallel processing: each file processed independently
   std::for_each(std::execution::par, files.begin(), files.end(),
                 [&](const fs::path &p) {
-                  process_image_file(p, geocoder, country_adapter,
+                  process_image_file(p, geocoder,
                                      priority_list, lang_override,
-                                     copyright_opt);
+                                     copyright_opt, rename_mode);
                 });
 }
 
@@ -457,6 +564,7 @@ int main(int argc, char **argv) {
 
   std::string folder_path = "";
   bool recursive = false;
+  bool rename_mode = false;
   std::string copyright_text = "";
 
   app.add_option("--lat", lat, "Latitude");
@@ -470,6 +578,7 @@ int main(int argc, char **argv) {
 
   app.add_option("--folder", folder_path, "Folder to scan for images");
   app.add_flag("--rekursive", recursive, "Scan folder recursively");
+  app.add_flag("--rename", rename_mode, "Rename files by timestamp");
   app.add_option("--copyright", copyright_text,
                  "Copyright text to write into metadata");
 
@@ -491,6 +600,7 @@ int main(int argc, char **argv) {
     adapters.push_back(std::make_unique<regeocode::GoogleAdapter>());
     adapters.push_back(std::make_unique<regeocode::OpenCageAdapter>());
     adapters.push_back(std::make_unique<regeocode::BingAdapter>());
+    adapters.push_back(std::make_unique<regeocode::CountryInfoAdapter>());
     adapters.push_back(std::make_unique<regeocode::GeoNamesTimezoneAdapter>());
     adapters.push_back(std::make_unique<regeocode::GeoNamesWikipediaAdapter>());
     adapters.push_back(std::make_unique<regeocode::OpenWeatherAdapter>());
@@ -504,9 +614,6 @@ int main(int argc, char **argv) {
     regeocode::ReverseGeocoder geocoder(std::move(config_result.apis),
                                         std::move(adapters), std::move(client),
                                         config_result.quota_file_path);
-
-    // Instantiate CountryAdapter for local info (used in image processing)
-    regeocode::CountryAdapter country_adapter("data/countries.json");
 
     // Priority list logic (--api overrides --strategy)
     std::vector<std::string> priority_list;
@@ -522,7 +629,7 @@ int main(int argc, char **argv) {
           copyright_text.empty() ? std::nullopt
                                  : std::optional<std::string>(copyright_text);
       process_folder(fs::path(folder_path), recursive, geocoder,
-                     country_adapter, priority_list, lang_override, cp_opt);
+                     priority_list, lang_override, cp_opt, rename_mode);
       return 0;
     }
 

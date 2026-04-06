@@ -1,5 +1,12 @@
+# OpenWeather Adapter
+
+The `OpenWeatherAdapter` provides support for the OpenWeather Geocoding API.
+
+---
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [OpenWeather Adapter](#openweather-adapter)
@@ -11,9 +18,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# OpenWeather Adapter
-
-The `OpenWeatherAdapter` provides support for the OpenWeather Geocoding API.
+---
 
 ## Details
 

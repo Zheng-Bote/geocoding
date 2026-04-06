@@ -1,5 +1,12 @@
+# Pollution API Adapter
+
+The `PollutionAdapter` provides support for environmental pollution data APIs.
+
+---
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [Pollution API Adapter](#pollution-api-adapter)
@@ -11,9 +18,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Pollution API Adapter
-
-The `PollutionAdapter` provides support for environmental pollution data APIs.
+---
 
 ## Details
 

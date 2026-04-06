@@ -196,6 +196,7 @@ ReverseGeocoder::reverse_geocode(const Coordinates &coords,
   params["longitude"] = coords.longitude;
   params["apikey"] = cfg.api_key;
   params["lang"] = language_code;
+  params["country_code"] = coords.country_code.empty() ? cfg.api_key : coords.country_code;
 
   inja::Environment env;
   std::string url = env.render(cfg.uri_template, params);

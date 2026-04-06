@@ -5,6 +5,7 @@ add_library(qt_regeocode SHARED
     http_client.cpp
     adapter_nominatim.cpp
     adapter_google.cpp
+    adapter_country_info.cpp
     adapter_opencage.cpp
     adapter_country.cpp
     re_geocode_c_api.cpp

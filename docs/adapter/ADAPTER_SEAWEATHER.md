@@ -1,5 +1,12 @@
+# SeaWeather Adapter
+
+The `SeaWeatherAdapter` provides support for specialized maritime weather APIs.
+
+---
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [SeaWeather Adapter](#seaweather-adapter)
@@ -11,9 +18,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# SeaWeather Adapter
-
-The `SeaWeatherAdapter` provides support for specialized maritime weather APIs.
+---
 
 ## Details
 

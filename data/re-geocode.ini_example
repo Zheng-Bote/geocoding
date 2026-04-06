@@ -52,6 +52,14 @@ daily-limit = 1000
 timeout = 10
 type = info
 
+[country_info]
+URI = https://restcountries.com/v3.1/alpha/{{ country_code }}
+API-Key = DE
+Adapter = country_info
+daily-limit = 1000
+timeout = 10
+type = info
+
 [timezone]
 URI = http://api.geonames.org/timezoneJSON?lat={{ latitude }}&lng={{ longitude }}&username={{ apikey }}
 API-Key = abcxyz123
@@ -89,6 +97,14 @@ URI = https://api.marea.ooo/v2/tides?duration=1440&interval=60&latitude={{ latit
 API-Key = abcxyz123
 Adapter = marea_tides
 daily-limit = 100
+timeout = 10
+type = info
+
+[country_info]
+URI = https://restcountries.com/v3.1/alpha/{{ country_code }}
+Adapter = country_info
+API-Key = DE
+daily-limit = 1000
 timeout = 10
 type = info
 

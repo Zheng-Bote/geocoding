@@ -1,21 +1,24 @@
+# Building and Distributing re-geocode via Conan
+
+The recommended way to integrate `re-geocode` into other C++ projects is by using the Conan 2 package manager.
+
+---
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
-- [Building and Distributing re-geocode via Conan](#building-and-distributing-re-geocode-via-conan)
-  - [1. Creating the Package Locally](#1-creating-the-package-locally)
-  - [2. Using the Package in your Project](#2-using-the-package-in-your-project)
-    - [`conanfile.txt` / `conanfile.py`](#conanfiletxt--conanfilepy)
-    - [`CMakeLists.txt`](#cmakeliststxt)
-  - [3. Uploading to a Remote Server](#3-uploading-to-a-remote-server)
-    - [Add Remote & Authenticate](#add-remote--authenticate)
-    - [Upload Package and Binaries](#upload-package-and-binaries)
+- [Bing Maps Adapter](#bing-maps-adapter)
+  - [Details](#details)
+  - [Functionality](#functionality)
+    - [`name()`](#name)
+    - [`parse_response(const std::string &response_body)`](#parse_responseconst-stdstring-response_body)
+  - [Example](#example)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Building and Distributing re-geocode via Conan
-
-The recommended way to integrate `re-geocode` into other C++ projects is by using the Conan 2 package manager. 
+---
 
 ## 1. Creating the Package Locally
 
@@ -31,6 +34,7 @@ conan create . -s build_type=Release
 ```
 
 > **Note on Missing Binaries**: If you encounter a `Missing prebuilt package` error for dependencies like `libcurl` or `openssl` (because no precompiled binaries exist for your specific compiler setup on ConanCenter), append `--build=missing` to the command:
+>
 > ```bash
 > conan create . -s build_type=Release --build=missing
 > ```
@@ -40,6 +44,7 @@ conan create . -s build_type=Release
 Once the package is in your local cache (or available via a remote Artifactory), you can easily add it to any C++ project.
 
 ### `conanfile.txt` / `conanfile.py`
+
 Add the dependency:
 
 ```ini
@@ -48,6 +53,7 @@ regeocode/1.0.0
 ```
 
 ### `CMakeLists.txt`
+
 Link it to your target:
 
 ```cmake
@@ -62,13 +68,16 @@ target_link_libraries(my_app PRIVATE regeocode::lib)
 To share the package with your team or use it in CI pipelines, you can upload it to a Conan Remote (e.g., JFrog Artifactory).
 
 ### Add Remote & Authenticate
+
 ```bash
 conan remote add myremote https://your-artifactory-url/api/conan/conan-local
 conan remote login myremote your_username
 ```
 
 ### Upload Package and Binaries
+
 Use the `-c` flag to upload all locally built binaries alongside the recipe:
+
 ```bash
 conan upload regeocode/1.0.0 -r myremote -c
 ```

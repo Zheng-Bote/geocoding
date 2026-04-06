@@ -20,6 +20,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-04-06
+
+### Added
+
+- **CountryInfoAdapter**: New API-based adapter for [RestCountries](https://restcountries.com/) providing rich country metadata.
+- **Dynamic Template Support**: Added `{{ country_code }}` support to URI templates in `ReverseGeocoder`.
+- **Enhanced Image Processing (reverse_geo_batch)**:
+  - **Auto-Renaming**: Optional `--rename` flag to rename images based on GPS/Exif/File timestamp (`YYYY-MM-DD_hhmmss.ext`).
+  - **Title Extraction**: Automatically extracts filename (replacing underscores with spaces) and writes it to `Xmp.dc.title`.
+  - **RestCountries Integration**: Fetches and embeds detailed country info (Continent, Cca2/3, Capital) into XMP metadata.
+- **Testing**: Added `tests/test_country_info.cpp` to verify RestCountries API integration.
+
+### Changed
+
+- Updated `cli/reverse_geo.cpp` to use `CountryInfoAdapter` instead of local `CountryAdapter` for richer metadata.
+- Improved `Coordinates` structure to optionally carry a `country_code`.
+
 ## [1.1.0] - 2026-04-04
 
 ### Added

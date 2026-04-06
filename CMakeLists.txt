@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.25)
 # cmake --build build -j"$(nproc)"
 
 project(regeocode
-    VERSION 1.1.0
+    VERSION 1.2.0
     DESCRIPTION "C++ Reverse Geocoding Library"
     HOMEPAGE_URL "https://github.com/Zheng-Bote/geocoding"
     LANGUAGES CXX C
@@ -65,6 +65,7 @@ add_library(regeocode
     src/adapter_openweather.cpp
     src/adapter_pollution.cpp
     src/adapter_bing.cpp
+    src/adapter_country_info.cpp
     src/adapter_marea_tides.cpp
     src/adapter_tides.cpp
     src/adapter_seaweather.cpp
@@ -173,6 +174,12 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reverse_geocode.cpp")
     add_executable(test_reverse_geocode tests/test_reverse_geocode.cpp)
     target_link_libraries(test_reverse_geocode PRIVATE regeocode::lib)
     add_test(NAME reverse_geocode_test COMMAND test_reverse_geocode)
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_country_info.cpp")
+    add_executable(test_country_info tests/test_country_info.cpp)
+    target_link_libraries(test_country_info PRIVATE regeocode::lib)
+    add_test(NAME country_info_test COMMAND test_country_info cn)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_country_adapter.cpp")

@@ -5,7 +5,7 @@ from conan.tools.files import copy
 
 class RegeocodeConan(ConanFile):
     name = "regeocode"
-    version = "1.0.0"
+    version = "1.2.0"
     description = "C++ Reverse Geocoding Library"
     homepage = "https://github.com/Zheng-Bote/geocoding"
     license = "MIT"

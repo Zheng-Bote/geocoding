@@ -1,5 +1,12 @@
+# Marea Tides Adapter
+
+The `MareaTidesAdapter` provides support for the Marea Tides API.
+
+---
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [Marea Tides Adapter](#marea-tides-adapter)
@@ -11,9 +18,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Marea Tides Adapter
-
-The `MareaTidesAdapter` provides support for the Marea Tides API.
+---
 
 ## Details
 

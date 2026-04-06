@@ -1,5 +1,12 @@
+# Bing Maps Adapter
+
+The `BingAdapter` provides support for the Bing Maps Reverse Geocoding API.
+
+---
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [Bing Maps Adapter](#bing-maps-adapter)
@@ -11,9 +18,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Bing Maps Adapter
-
-The `BingAdapter` provides support for the Bing Maps Reverse Geocoding API.
+---
 
 ## Details
 
