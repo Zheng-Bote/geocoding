@@ -1,0 +1,17 @@
+[
+  {
+    "name": "json",
+    "url": "https://github.com/nlohmann/json.git",
+    "version": "v3.11.3"
+  },
+  {
+    "name": "inifile-cpp",
+    "url": "https://github.com/Rookfighter/inifile-cpp.git",
+    "version": "master"
+  },
+  {
+    "name": "cli11",
+    "url": "https://github.com/CLIUtils/CLI11.git",
+    "version": "v2.4.1"
+  }
+]
